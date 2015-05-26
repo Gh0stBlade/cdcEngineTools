@@ -144,8 +144,6 @@ void cDRM::ExtractSections(char* szFilePath)
 
 void cDRM::Destroy()
 {
-	if (this->pSections != NULL)
+	if (this->pSections != NULL && this->uiNumSections > 0)
 		delete[] this->pSections;
-
-	delete this;
 }

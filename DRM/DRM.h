@@ -21,6 +21,7 @@
 #define DRM_H
 
 //Includes
+#include <stdio.h>
 
 //Definitions
 #define  DRM_MAX_SECTIONS (16777215)
@@ -52,7 +53,7 @@ private:
 
 	unsigned int uiNumSections;
 
-	Section *pSections;
+	Section *pSections = NULL;
 };
 
 class cDRM::Section
