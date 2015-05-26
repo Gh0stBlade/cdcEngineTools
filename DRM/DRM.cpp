@@ -26,7 +26,7 @@
 #include <fstream>
 #include <sstream>
 
-void cDRM::LoadFromFile(char* szFilePath)
+void cDRM::ExtractSections(char* szFilePath)
 {
 	//Store DRM input path
 	this->szFilePath = szFilePath;
@@ -34,11 +34,22 @@ void cDRM::LoadFromFile(char* szFilePath)
 	//Initialise ifstream for reading in binary mode
 	std::ifstream ifs(this->szFilePath, std::ios::binary);
 
+	//If it's not good to go
+	if (!ifs.good())
+	{
+		std::cout << "Fatal Error: Failed to open file at path: " << this->szFilePath << std::endl;
+		return;
+	}
+
 	//Read our DRM header into cDRM
 	this->uiVersion = ReadUInt(ifs);
-	this->uiNumSections = ReadUInt(ifs);
+	if (this->uiVersion != DRM_VERSION)
+	{
+		std::cout << "Fatal Error: Version mis-match! expected: " << DRM_VERSION << " got: " << this->uiVersion << std::endl;
+		return;
+	}
 
-	//If we're exceeding the max amount of sections error
+	this->uiNumSections = ReadUInt(ifs);
 	if (this->uiNumSections > DRM_MAX_SECTIONS)
 	{
 		std::cout << "Fatal Error: Number of Sections: " << this->uiNumSections << " exceeded the limit of: " << DRM_MAX_SECTIONS << "!" << std::endl;
@@ -67,15 +78,6 @@ void cDRM::LoadFromFile(char* szFilePath)
 		this->pSections[i].uiLang = ReadUInt(ifs);
 	}
 
-	//Close ifstream
-	ifs.close();
-}
-
-void cDRM::ExtractSections()
-{
-	//Initialise ifstream for reading in binary mode
-	std::ifstream ifs(this->szFilePath, std::ios::binary);
-
 	std::string strOutPath = std::string(this->szFilePath);
 	strOutPath = strOutPath.substr(0, strOutPath.find_last_of(".")) + "\\";
 
@@ -99,6 +101,7 @@ void cDRM::ExtractSections()
 
 			//Declare output file stream
 			std::ofstream ofs(strOutPath2.str(), std::ios::binary);
+
 
 			//Skip header info
 			ifs.seekg(((this->pSections[i].uiHeaderSize >> 0x8) * 0x8), SEEK_CUR);
@@ -132,6 +135,8 @@ void cDRM::ExtractSections()
 			delete[] szSectionData;
 		}
 	}
+
+	ifs.close();
 
 	//Print success
 	std::cout << "Successfully Extracted: " << "[ " << (this->uiNumSections) << " ] " << " section(s)!" << std::endl;

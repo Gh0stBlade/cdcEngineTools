@@ -25,14 +25,17 @@
 //Definitions
 #define  DRM_MAX_SECTIONS (16777215)
 
+#if TR7
+	#define DRM_VERSION (14) 
+#endif
+
 //Classes
 class cDRM
 {
 	class Section;
 
 public:
-	void LoadFromFile(char* szFilePath);
-	void ExtractSections();
+	void ExtractSections(char* szFilePath);
 	void Destroy();
 
 private:

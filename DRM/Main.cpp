@@ -17,8 +17,58 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#include <stdio.h>
+#include <iostream>
+
+#include "DRM.h"
+#include "Game.h"
+#include "PlatformSetup.h"
+
+void PrintToolInfo();
+void PrintToolUsage();
+
 int main(int argc, char* argv[])
 {
+	//Print the tool info on-screen.
+	PrintToolInfo();
+
+	//If there are args to process.
+	if (argc == 2)
+	{
+		//If the file doesn't exist.
+		//if (!FileExists(argv[1]))
+		{
+			std::cout << "Fatal Error: File at path: " << argv[1] << " does not exist!" << std::endl;
+			//return 0;
+		}
+
+		cDRM mDRM;
+		mDRM.ExtractSections(argv[1]);
+		mDRM.Destroy();
+	}
+	else
+	{
+		std::cout << "Fatal Error: Insufficient amount of args!" << std::endl;
+		PrintToolUsage();
+	}
+
 	return 0;
 }
 
+void PrintToolInfo()
+{
+#if DEBUG
+	std::cout << "DRM v1.0 (DEBUG) for " << GAME_NAME << std::endl;
+#else
+	std::cout << "DRM v1.0 for " << GAME_NAME << std::endl;
+#endif
+	std::cout << "Platform: " << PLATFORM_FULL_NAME << " (" << PLATFORM_CONFIG_NAME << ")" << std::endl;
+	std::cout << "Built: " << (__DATE__ ", " __TIME__) << std::endl;
+	std::cout << "By Gh0stBlade" << std::endl;
+}
+
+void PrintToolUsage()
+{
+	std::cout << "DRM.exe [input.drm]" << std::endl;
+	system("pause");
+}
