@@ -17,8 +17,31 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-int main(int argc, char* argv[])
-{
-	return 0;
-}
+#ifndef FILE_H
+#define FILE_H
 
+#include "PlatformSetup.h"
+
+#include <fstream>
+#include <iostream>
+
+template <class t>
+void Reverse(t *t);
+
+char ReadByte(std::ifstream& ifs);
+unsigned char ReadUByte(std::ifstream& ifs);
+short ReadShort(std::ifstream& ifs);
+unsigned short ReadUShort(std::ifstream& ifs);
+int ReadInt(std::ifstream& ifs);
+unsigned int ReadUInt(std::ifstream& ifs);
+
+void WriteByte(std::ofstream& ofs, char input);
+void WriteUByte(std::ofstream& ofs, unsigned char input);
+void WriteShort(std::ofstream& ofs, short input);
+void WriteUShort(std::ofstream& ofs, unsigned short input);
+void WriteInt(std::ofstream& ofs, int input);
+void WriteUInt(std::ofstream& ofs, unsigned int input);
+
+void CreateDirectories(std::string str);
+
+#endif

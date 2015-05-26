@@ -17,8 +17,17 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-int main(int argc, char* argv[])
-{
-	return 0;
-}
+#ifndef PLATFORM_H
+#define PLATFORM_H
 
+
+#if PC || PS2 || PSP || WII || PSP ///@FIXME Check these
+#define ENDIAN_BIG (0)
+#elif XENON || PS3 || NGC
+#define ENDIAN_BIG (1)
+#else
+//Error
+
+#endif
+
+#endif
