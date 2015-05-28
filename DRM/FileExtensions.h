@@ -24,17 +24,17 @@
 
 char* szExtensions[]
 {
-	    ".general",
-		".empty",
-		".animation",
-		".pushbufferwc",
-		".pushbuffer",
-		".texture",
-		".wave",
-		".dtpdata",
+	    ".gnc",
+		".ept",
+		".ani",
+		".pbrwc",
+		".pbr",
+		".pcd",
+		".fsb",
+		".dtp",
 		".script",
-		".shaderlib",
-		".numsectiontypes"
+		".shad",
+		".nst"
 };
 
 #elif TR8
@@ -57,14 +57,82 @@ char* szExtensions[]
 			".unk13"
 		};
 	#elif XENON
-	
-#endif
+		char* szExtensions[]
+		{
+				".gnc",
+				".unk01",
+				".ani",
+				".unk03",
+				".unk04",
+				".tr8x360",
+				".fsb",
+				".dtp",
+				".script",
+				".shad",
+				".matd",
+				".obj",
+				".tr8mesh",
+				".unk13"
+		};
+	#elif PS3
+		char* szExtensions[]
+		{
+			"	.gnc",
+				".unk01",
+				".ani",
+				".unk03",
+				".unk04",
+				".tr8ps3t",
+				".fsb",
+				".dtp",
+				".script",
+				".shad",
+				".matd",
+				".obj",
+				".tr8mesh",
+				".unk13"
+		};
+	#elif WII
+		char* szFileExtensions[]
+		{
+				".gnc",
+				".unk01",
+				".ani",
+				".unk03",
+				".unk04",
+				".tr8sgl",
+				".fsb",
+				".dtp",
+				".script",
+				".shad",
+				".matd",
+				".obj",
+				".tr8mesh",
+				".unk13"
+		};
+	#elif PS2
+		char* szFileExtensions[]
+		{
+				".gnc",
+				".unk01",
+				".ani",
+				".unk03",
+				".unk04",
+				".tr8sgl",
+				".fsb",
+				".dtp",
+				".script",
+				".shad",
+				".matd",
+				".obj",
+				".tr8mesh",
+				".unk13"
+		};
 	#else
 		#error "Unsupported Platform!"
-#endif
-
+	#endif
 #else
-#error "Unsupported Game!"
+	#error "Unsupported Game!"
 #endif
 
 #endif
