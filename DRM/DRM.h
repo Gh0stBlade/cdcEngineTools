@@ -26,7 +26,7 @@
 //Definitions
 #define  DRM_MAX_SECTIONS (16777215)
 
-#if TR7
+#if TR7 || TRAE
 #define DRM_VERSION (14)
 #elif TR8
 #define DRM_VERSION (19)

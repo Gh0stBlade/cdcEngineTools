@@ -116,7 +116,7 @@ void cDRM::ExtractSections(char* szFilePath)
 
 
 			//Skip header info
-#if TR7
+#if TR7 || TRAE
 			ifs.seekg(((this->pSections[i].uiHeaderSize >> 0x8) * 0x8), SEEK_CUR);
 #elif TR8
 			ifs.seekg((this->pSections[i].uiHeaderSize >> 0x8), SEEK_CUR);
@@ -142,7 +142,7 @@ void cDRM::ExtractSections(char* szFilePath)
 			std::ofstream ofs(strOutPath2.str(), std::ios::binary);
 
 			//Read then write the section data
-#if TR7
+#if TR7 || TRAE
 			ifs.read(szSectionData, this->pSections[i].uiSize + ((this->pSections[i].uiHeaderSize >> 0x8) * 0x8));
 			ofs.write(szSectionData, this->pSections[i].uiSize + ((this->pSections[i].uiHeaderSize >> 0x8) * 0x8));
 #elif TR8

@@ -22,20 +22,37 @@
 
 #if TR7
 
-char* szExtensions[]
-{
-	    ".gnc",
-		".ept",
-		".ani",
-		".pbrwc",
-		".pbr",
-		".pcd",
-		".fsb",
-		".dtp",
-		".script",
-		".shad",
-		".nst"
-};
+		char* szExtensions[]
+		{
+				".gnc",
+				".ept",
+				".ani",
+				".pbrwc",
+				".pbr",
+				".pcd",
+				".fsb",
+				".dtp",
+				".script",
+				".shad",
+				".nst"
+		};
+
+#elif TRAE
+
+	char* szExtensions[]
+	{
+		".gnc",
+			".ept",
+			".ani",
+			".pbrwc",
+			".pbr",
+			".pcd",
+			".fsb",
+			".dtp",
+			".script",
+			".shad",
+			".nst"
+	};
 
 #elif TR8
 	#if PC
@@ -77,7 +94,7 @@ char* szExtensions[]
 	#elif PS3
 		char* szExtensions[]
 		{
-			"	.gnc",
+			    ".gnc",
 				".unk01",
 				".ani",
 				".unk03",
@@ -93,7 +110,7 @@ char* szExtensions[]
 				".unk13"
 		};
 	#elif WII
-		char* szFileExtensions[]
+		char* szExtensions[]
 		{
 				".gnc",
 				".unk01",
@@ -111,7 +128,7 @@ char* szExtensions[]
 				".unk13"
 		};
 	#elif PS2
-		char* szFileExtensions[]
+		char* szExtensions[]
 		{
 				".gnc",
 				".unk01",

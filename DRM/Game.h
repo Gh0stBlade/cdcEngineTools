@@ -22,9 +22,11 @@
 
 #if TR7
 #define GAME_NAME "Tomb Raider: Legend"
+#elif TRAE
+#define GAME_NAME "Tomb Raider: Anniversary"
 #elif TR8
 #define GAME_NAME "Tomb Raider: Underworld"
-#endif
 #else
 #error "Unsupported Game!"
+#endif
 #endif
