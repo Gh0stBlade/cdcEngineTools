@@ -1,5 +1,5 @@
 /*
-	[DRM/CDRM] Tomb Raider: Legend/Anniversary/Underworld DRM/CDRM Unpacker
+	[DRM] Tomb Raider: Legend/Anniversary/Underworld DRM Unpacker
 	Copyright (C) Gh0stBlade 2015 - gh0stblade@live[dot]co.uk
 
 	This program is free software; you can redistribute it and/or
@@ -27,7 +27,9 @@
 #define  DRM_MAX_SECTIONS (16777215)
 
 #if TR7
-	#define DRM_VERSION (14) 
+#define DRM_VERSION (14)
+#else
+#error "Unsupported Game!"
 #endif
 
 //Classes
@@ -96,10 +98,10 @@ enum cDRM::Section::Types
 	UNK03 = 3,
 	UNK04 = 4,
 	TEXTURE = 5,
-	AUDIO = 6,
-	DTP = 7,
+	WAVE = 6,
+	DTPDATA = 7,
 	SCRIPT = 8,
-	SHADER = 9,
+	SHADERLIB = 9,
 	MATERIAL = 10,
 	OBJ = 11,
 	MESH = 12,

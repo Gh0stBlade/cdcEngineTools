@@ -1,5 +1,5 @@
 /*
-	[DRM/CDRM] Tomb Raider: Legend/Anniversary/Underworld DRM/CDRM Unpacker
+	[DRM] Tomb Raider: Legend/Anniversary/Underworld DRM Unpacker
 	Copyright (C) Gh0stBlade 2015 - gh0stblade@live[dot]co.uk
 
 	This program is free software; you can redistribute it and/or
@@ -35,10 +35,6 @@
 #define PLATFORM_FULL_NAME "WII"
 #define PLATFORM_CONFIG_NAME "WII-W"
 #define ENDIAN_BIG (0)
-#elif PSP 
-#define PLATFORM_FULL_NAME "PSP"
-#define PLATFORM_CONFIG_NAME "PSP-W"
-#define ENDIAN_BIG (0)
 #elif XENON 
 #define PLATFORM_FULL_NAME "XENON"
 #define PLATFORM_CONFIG_NAME "XENON-W"
@@ -52,8 +48,7 @@
 #define PLATFORM_CONFIG_NAME "NGC-W"
 #define ENDIAN_BIG (1)
 #else
-//Error
-
+#error "Unsupported Platform!"
 #endif
 
 #endif

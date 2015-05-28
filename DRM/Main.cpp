@@ -1,5 +1,5 @@
 /*
-	[DRM/CDRM] Tomb Raider: Legend/Anniversary/Underworld DRM/CDRM Unpacker
+	[DRM] Tomb Raider: Legend/Anniversary/Underworld DRM Unpacker
 	Copyright (C) Gh0stBlade 2015 - gh0stblade@live[dot]co.uk
 
 	This program is free software; you can redistribute it and/or
