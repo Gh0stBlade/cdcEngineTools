@@ -18,4 +18,4 @@ Tool Usage:
 
 Note: It is important that the correct GAME and PLATFORM assets is passed to the correct tool otherwise unforeseen issues may occur!
 
-Disclaimer: I am not responsible for any damage these tools "may" incur.
+Disclaimer: I am not responsible for any damage these tools may incur.
