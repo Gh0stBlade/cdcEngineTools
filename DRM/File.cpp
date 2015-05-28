@@ -162,7 +162,7 @@ unsigned int GetFileType(const char* szFilePath)
 {
 	std::ifstream ifs(szFilePath, std::ios::binary);
 
-	if (!ifs.good)
+	if (!ifs.good())
 	{
 		std::cout << "Fatal Error: Failed to open file!" << std::endl;
 		return -1;
