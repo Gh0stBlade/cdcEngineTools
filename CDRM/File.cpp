@@ -157,3 +157,18 @@ void CreateDirectories(std::string str)
 		CreateDirectory(str.substr(0, iPos).c_str(), NULL);
 	}
 }
+
+unsigned int GetFileType(const char* szFilePath)
+{
+	std::ifstream ifs(szFilePath, std::ios::binary);
+
+	if (!ifs.good())
+	{
+		std::cout << "Fatal Error: Failed to open file!" << std::endl;
+		return -1;
+	}
+
+	unsigned int uiMagic = ReadUInt(ifs);
+	ifs.close();
+	return uiMagic;
+}

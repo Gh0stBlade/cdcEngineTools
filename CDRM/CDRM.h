@@ -22,6 +22,7 @@
 
 //Includes
 #include <stdio.h>
+#include <sstream>
 
 //Definitions
 #define  CDRM_MAGIC (0x4D524443)
@@ -45,16 +46,15 @@ class cCDRM
 
 public:
 	void Decompress(char* szFilePath);
+	void Compress(const char* szFilePath, unsigned int uiCompressionMode);
 	void Destroy();
 
 private:
 	char* szFilePath;
 
-#if TR8///@FIXME remove?
 	unsigned int uiMagic;
 	unsigned int uiNumCompressedBlocks;
 	Entry *pEntries = NULL;
-#endif
 	
 };
 
@@ -74,6 +74,8 @@ enum cCDRM::Entry::Flags
 	UNCOMPRESSED = 1,
 	COMPRESSED = 2
 };
+
+void CompressData(char* szUncompressedData, unsigned int uiUncompressedSize, std::string &strOutData);
 
 #endif
 

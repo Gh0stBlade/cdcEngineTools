@@ -23,6 +23,7 @@
 #include "CDRM.h"
 #include "Game.h"
 #include "PlatformSetup.h"
+#include "File.h"
 
 void PrintToolInfo();
 void PrintToolUsage();
@@ -35,16 +36,28 @@ int main(int argc, char* argv[])
 	//If there are args to process.
 	if (argc == 2)
 	{
-		//If the file doesn't exist.
-		//if (!FileExists(argv[1]))
+		//Get filetype and perform specific action
+		switch (GetFileType(argv[1]))
 		{
-			std::cout << "Fatal Error: File at path: " << argv[1] << " does not exist!" << std::endl;
-			//return 0;
+		case -1://Error occured
+			return 0;
+		case CDRM_MAGIC: //"CDRM"
+		{
+			//Decompress the cdrm from input path
+			cCDRM mCDRM;
+			mCDRM.Decompress(argv[1]);
+			mCDRM.Destroy();
+			break;
 		}
+		default:
+		{	//Compress the drm from the input path
+			cCDRM mCDRM;
+			mCDRM.Compress(argv[1], 2);
+			break;
+		}
+	}
 
-		cCDRM mCDRM;
-		mCDRM.Decompress(argv[1]);
-		mCDRM.Destroy();
+		
 	}
 	else
 	{
@@ -58,9 +71,9 @@ int main(int argc, char* argv[])
 void PrintToolInfo()
 {
 #if DEBUG
-	std::cout << "CDRM v1.0 (DEBUG) for " << GAME_NAME << std::endl;
+	std::cout << "CDRM v1.1 (DEBUG) for " << GAME_NAME << std::endl;
 #else
-	std::cout << "CDRM v1.0 for " << GAME_NAME << std::endl;
+	std::cout << "CDRM v1.1 for " << GAME_NAME << std::endl;
 #endif
 	std::cout << "Platform: " << PLATFORM_FULL_NAME << " (" << PLATFORM_CONFIG_NAME << ")" << std::endl;
 	std::cout << "Built: " << (__DATE__ ", " __TIME__) << std::endl;

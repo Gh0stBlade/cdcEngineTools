@@ -94,11 +94,11 @@ enum cDRM::Section::Types
 	NUM_SECTION_TYPES = 10
 
 #elif TR8
-	UNK00 = 0,
-	UNK01 = 1,
+	GENERAL = 0,
+	EMPTY = 1,
 	ANIMATION = 2,
-	UNK03 = 3,
-	UNK04 = 4,
+	PUSHBUFFER_WC = 3,
+	PUSHBUFFER = 4,
 	TEXTURE = 5,
 	WAVE = 6,
 	DTPDATA = 7,
