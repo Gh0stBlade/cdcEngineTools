@@ -91,13 +91,13 @@ void cCDRM::Decompress(char* szFilePath)
 		char* szCompressedData = new char[this->pEntries[i].uiCompressedSize];
 		char* szUncompressedData = new char[this->pEntries[i].uiUnCompressedSize >> 8];
 
-#if _DEBUG
+#if DEBUG
 		std::cout << "Start Offset: " << ifs.tellg() << " i:" << i << std::endl;
 #endif
 		//Read the compressed Zlib data into compressedData
 		ifs.read(szCompressedData, this->pEntries[i].uiCompressedSize);
 
-#if _DEBUG
+#if DEBUG
 		std::cout << "End Offset: " << ifs.tellg() << " i:" << i << std::endl;
 #endif
 		//Skip according to alignment
@@ -107,10 +107,22 @@ void cCDRM::Decompress(char* szFilePath)
 		if ((this->pEntries[i].uiUnCompressedSize & 0xFF) == cCDRM::Entry::COMPRESSED)
 		{
 			this->pEntries[i].DecompressEntry(szCompressedData, szUncompressedData);
+
 			//Write decompressed blocks to a temporary file
 			std::ofstream ofs("temp.bin", std::ios::binary | std::ios::app);
+
+			//If not good to go
+			if (!ofs.good())
+			{
+				std::cout << "Fatal Error: Unknown error occured whilst initialising ofstream!" << std::endl;
+				return;
+			}
+
+			//Skip to EOF and write uncompressed data
 			ofs.seekp(0, std::ios::end);
 			ofs.write(szUncompressedData, (this->pEntries[i].uiUnCompressedSize >> 8));
+
+			//Flush and close ofstream
 			ofs.flush();
 			ofs.close();
 		}
@@ -118,8 +130,19 @@ void cCDRM::Decompress(char* szFilePath)
 		{
 			//Write uncompressed blocks to a temporary file
 			std::ofstream ofs("temp.bin", std::ios::binary | std::ios::app);
+
+			//If not good to go
+			if (!ofs.good())
+			{
+				std::cout << "Fatal Error: Unknown error occured whilst initialising ofstream!" << std::endl;
+				return;
+			}
+
+			//Skip to EOF and write uncompressed data
 			ofs.seekp(0, std::ios::end);
 			ofs.write(szCompressedData, (this->pEntries[i].uiCompressedSize));
+
+			//Flush and close ofstream
 			ofs.flush();
 			ofs.close();
 		}

@@ -73,7 +73,7 @@ void cDRM::ExtractSections(char* szFilePath)
 	//Allocate our sections
 	this->pSections = new Section[this->uiNumSections];
 
-	//Read all the section info into mDRM
+	//Read all the section info into this
 	for (int i = 0; i != this->uiNumSections; i++)
 	{
 		this->pSections[i].uiSize = ReadUInt(ifs);
@@ -91,14 +91,15 @@ void cDRM::ExtractSections(char* szFilePath)
 #endif
 
 	std::string strOutPath = std::string(this->szFilePath);
-	strOutPath = strOutPath.substr(0, strOutPath.find_last_of(".")) + "\\";
+	strOutPath = strOutPath.substr(0, strOutPath.find_last_of(".")) + "\\";;
+
+	//Create Directories
+	CreateDirectories(strOutPath);
 
 	for (int i = 0; i != this->uiNumSections; i++)
 	{
+		//Print extraction message to console
 		std::cout << "Extracting Section: " << "[ " << (i + 1) << " / " << this->uiNumSections << " ]" << std::endl;
-
-		//Create Directory
-		CreateDirectories(strOutPath);
 
 		//Define output file path
 		std::stringstream strOutPath2;
@@ -114,6 +115,12 @@ void cDRM::ExtractSections(char* szFilePath)
 			//Declare output file stream
 			std::ofstream ofs(strOutPath2.str(), std::ios::binary);
 
+			//If not good to go
+			if (!ofs.good())
+			{
+				std::cout << "Fatal Error: Unknown error occured whilst initialising ofstream!" << std::endl;
+				return;
+			}
 
 			//Skip header info
 #if TR7 || TRAE
@@ -127,19 +134,31 @@ void cDRM::ExtractSections(char* szFilePath)
 			ifs.read(szSectionData, this->pSections[i].uiSize);
 			ofs.write(szSectionData, this->pSections[i].uiSize);
 			
+			//Flush and close ofstream
 			ofs.flush();
 			ofs.close();
 
-			//Clear memory
+			//delete allocated section data
 			delete[] szSectionData;
 		}
 		else
 		{
-			//Declare variables to store data
+			//Declare char* to store section data
+#if TR7 || TRAE
 			char* szSectionData = new char[this->pSections[i].uiSize + ((this->pSections[i].uiHeaderSize >> 0x8) * 0x8)];
+#elif TR8
+			char* szSectionData = new char[this->pSections[i].uiSize + (this->pSections[i].uiHeaderSize >> 0x8)];
+#endif
 
 			//Declare output file stream
 			std::ofstream ofs(strOutPath2.str(), std::ios::binary);
+
+			//If not good to go
+			if (!ofs.good())
+			{
+				std::cout << "Fatal Error: Unknown error occured whilst initialising ofstream!" << std::endl;
+				return;
+			}
 
 			//Read then write the section data
 #if TR7 || TRAE
@@ -151,14 +170,16 @@ void cDRM::ExtractSections(char* szFilePath)
 #else
 #error "Unsupported Game!"
 #endif
+			//Flush and close ofstream
 			ofs.flush();
 			ofs.close();
 
-			//Clear memory
+			//Delete allocated section data
 			delete[] szSectionData;
 		}
 	}
 
+	//Close ifstream
 	ifs.close();
 
 	//Print success
