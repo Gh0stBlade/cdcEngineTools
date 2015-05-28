@@ -21,6 +21,8 @@
 #include <iostream>
 #include <Shlwapi.h>
 
+#include "PlatformSetup.h"
+
 unsigned int ReverseUInt(unsigned int uiInput)
 {
 	return (unsigned int)(((uiInput & 0xFFu) << 24) | ((uiInput & 0xFF00u) << 8) | ((uiInput & 0xFF0000u) >> 8) | ((uiInput & 0xFF000000u) >> 24));
@@ -120,7 +122,7 @@ void WriteUShort(std::ofstream& ofs, unsigned short input)
 {
 	unsigned short val = input;
 #if ENDIAN_BIG
-	ReverseUShort(&val);
+	ReverseUShort(val);
 #endif
 	ofs.write((char*)&val, sizeof(unsigned short));
 }

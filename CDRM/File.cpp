@@ -21,6 +21,8 @@
 #include <iostream>
 #include <Shlwapi.h>
 
+#include "PlatformSetup.h"
+
 unsigned int ReverseUInt(unsigned int uiInput)
 {
 	return (unsigned int)(((uiInput & 0xFFu) << 24) | ((uiInput & 0xFF00u) << 8) | ((uiInput & 0xFF0000u) >> 8) | ((uiInput & 0xFF000000u) >> 24));
@@ -90,7 +92,7 @@ unsigned int ReadUInt(std::ifstream& ifs)
 	unsigned int val;
 	ifs.read((char*)&val, sizeof(unsigned int));
 #if ENDIAN_BIG
-	ReverseUInt(val);
+	val = ReverseUInt(val);
 #endif
 	return val;
 }
@@ -111,7 +113,7 @@ void WriteShort(std::ofstream& ofs, short input)
 {
 	short val = input;
 #if ENDIAN_BIG
-	ReverseShort(val);
+	val = ReverseShort(val);
 #endif
 	ofs.write((char*)&val, sizeof(short));
 }
@@ -120,7 +122,7 @@ void WriteUShort(std::ofstream& ofs, unsigned short input)
 {
 	unsigned short val = input;
 #if ENDIAN_BIG
-	ReverseUShort(&val);
+	val = ReverseUShort(val);
 #endif
 	ofs.write((char*)&val, sizeof(unsigned short));
 }
@@ -129,7 +131,7 @@ void WriteInt(std::ofstream& ofs, int input)
 {
 	int val = input;
 #if ENDIAN_BIG
-	ReverseInt(val);
+	val = ReverseInt(val);
 #endif
 	ofs.write((char*)&val, sizeof(int));
 }
@@ -138,7 +140,7 @@ void WriteUInt(std::ofstream& ofs, unsigned int input)
 {
 	unsigned int val = input;
 #if ENDIAN_BIG
-	ReverseUInt(val);
+	val = ReverseUInt(val);
 #endif
 	ofs.write((char*)&val, sizeof(unsigned int));
 }

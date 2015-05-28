@@ -23,6 +23,7 @@
 #if PC 
 #define PLATFORM_FULL_NAME "PC"
 #define PLATFORM_CONFIG_NAME "PC-W"
+#define ENDIAN_BIG (0)
 #elif PS2 
 #define PLATFORM_FULL_NAME "PS2"
 #define PLATFORM_CONFIG_NAME "PS2-W"

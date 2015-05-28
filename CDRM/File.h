@@ -25,8 +25,10 @@
 #include <fstream>
 #include <iostream>
 
-template <class t>
-void Reverse(t *t);
+unsigned int ReverseUInt(unsigned int uiInput);
+int ReverseInt(int iInput);
+unsigned short ReverseUShort(unsigned short usInput);
+short ReverseShort(short sInput);
 
 char ReadByte(std::ifstream& ifs);
 unsigned char ReadUByte(std::ifstream& ifs);
