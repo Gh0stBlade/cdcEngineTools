@@ -16,6 +16,6 @@ Tool Usage:
 3. Drag and drop the DRM file onto CDRM.EXE which will decompress the CDRM's compressed blocks.
 4. Finally, to extract the DRM you must drag and drop the DRM file onto DRM.EXE.
 
-Note: It is important that the correct GAME and PLATFORM assets is passed to the correct tool otherwise unforeseen issues may occur!
+Note: It is important that the correct GAME and PLATFORM assets are passed to the correct tool otherwise unforeseen issues may occur!
 
 Disclaimer: I am not responsible for any damage these tools may incur.
