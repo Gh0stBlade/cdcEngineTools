@@ -49,6 +49,13 @@ void cDRM::ExtractSections(char* szFilePath)
 		return;
 	}
 
+#if TR8
+	this->uiNameSize = ReadUInt(ifs);
+	this->uiPaddingSize = ReadUInt(ifs);
+	this->uiUnk00 = ReadUInt(ifs);
+	this->uiUnk01 = ReadUInt(ifs);
+#endif
+
 	this->uiNumSections = ReadUInt(ifs);
 	if (this->uiNumSections > DRM_MAX_SECTIONS)
 	{
@@ -78,6 +85,11 @@ void cDRM::ExtractSections(char* szFilePath)
 		this->pSections[i].uiLang = ReadUInt(ifs);
 	}
 
+#if TR8
+	//Skip past names & padding info
+	ifs.seekg(this->uiNameSize + this->uiPaddingSize, SEEK_CUR);
+#endif
+
 	std::string strOutPath = std::string(this->szFilePath);
 	strOutPath = strOutPath.substr(0, strOutPath.find_last_of(".")) + "\\";
 
@@ -93,7 +105,7 @@ void cDRM::ExtractSections(char* szFilePath)
 		strOutPath2 << strOutPath << std::hex << i << szExtensions[this->pSections[i].ucType];
 
 		//Skip header
-		bool bRealSize = false;
+		bool bRealSize = true;
 		if (bRealSize)
 		{
 			//Declare variables to store data
@@ -104,8 +116,13 @@ void cDRM::ExtractSections(char* szFilePath)
 
 
 			//Skip header info
+#if TR7
 			ifs.seekg(((this->pSections[i].uiHeaderSize >> 0x8) * 0x8), SEEK_CUR);
-
+#elif TR8
+			ifs.seekg((this->pSections[i].uiHeaderSize >> 0x8), SEEK_CUR);
+#else
+#error "Unsupported Game!"
+#endif
 			//Read then write the section data
 			ifs.read(szSectionData, this->pSections[i].uiSize);
 			ofs.write(szSectionData, this->pSections[i].uiSize);
@@ -125,9 +142,15 @@ void cDRM::ExtractSections(char* szFilePath)
 			std::ofstream ofs(strOutPath2.str(), std::ios::binary);
 
 			//Read then write the section data
+#if TR7
 			ifs.read(szSectionData, this->pSections[i].uiSize + ((this->pSections[i].uiHeaderSize >> 0x8) * 0x8));
 			ofs.write(szSectionData, this->pSections[i].uiSize + ((this->pSections[i].uiHeaderSize >> 0x8) * 0x8));
-
+#elif TR8
+			ifs.read(szSectionData, this->pSections[i].uiSize + (this->pSections[i].uiHeaderSize >> 0x8));
+			ofs.write(szSectionData, this->pSections[i].uiSize + (this->pSections[i].uiHeaderSize >> 0x8));
+#else
+#error "Unsupported Game!"
+#endif
 			ofs.flush();
 			ofs.close();
 

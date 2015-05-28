@@ -28,6 +28,8 @@
 
 #if TR7
 #define DRM_VERSION (14)
+#elif TR8
+#define DRM_VERSION (19)
 #else
 #error "Unsupported Game!"
 #endif
@@ -50,7 +52,7 @@ private:
 	unsigned int uiNameSize;
 	unsigned int uiPaddingSize;
 	unsigned int uiUnk00;
-	unsigned int uiUnk02;
+	unsigned int uiUnk01;
 #endif
 
 	unsigned int uiNumSections;

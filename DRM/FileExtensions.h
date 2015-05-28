@@ -20,6 +20,8 @@
 #ifndef FILEEXTENSIONS_H
 #define FILEEXTESNIONS_H
 
+#if TR7
+
 char* szExtensions[]
 {
 	    ".general",
@@ -34,5 +36,35 @@ char* szExtensions[]
 		".shaderlib",
 		".numsectiontypes"
 };
+
+#elif TR8
+	#if PC
+		char* szExtensions[]
+		{
+			".gnc",
+			".unk01",
+			".ani",
+			".unk03",
+			".unk04",
+			".tr8pcd9",
+			".fsb",
+			".dtp",
+			".script",
+			".shad",
+			".matd",
+			".obj",
+			".tr8mesh",
+			".unk13"
+		};
+	#elif XENON
+	
+#endif
+	#else
+		#error "Unsupported Platform!"
+#endif
+
+#else
+#error "Unsupported Game!"
+#endif
 
 #endif
