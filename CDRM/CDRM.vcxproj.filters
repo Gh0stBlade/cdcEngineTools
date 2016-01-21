@@ -35,9 +35,6 @@
     <ClInclude Include="PlatformSetup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FileExtensions.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Game.h">
       <Filter>Header Files</Filter>
     </ClInclude>

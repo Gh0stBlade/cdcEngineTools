@@ -44,14 +44,13 @@ int main(int argc, char* argv[])
 		case CDRM_MAGIC: //"CDRM"
 		{
 			//Decompress the cdrm from input path
-			cCDRM mCDRM;
+			CDRM mCDRM;
 			mCDRM.Decompress(argv[1]);
-			mCDRM.Destroy();
 			break;
 		}
 		default:
 		{	//Compress the drm from the input path
-			cCDRM mCDRM;
+			CDRM mCDRM;
 			mCDRM.Compress(argv[1], 2);
 			break;
 		}

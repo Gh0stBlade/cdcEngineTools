@@ -44,7 +44,6 @@ void WriteUShort(std::ofstream& ofs, unsigned short input);
 void WriteInt(std::ofstream& ofs, int input);
 void WriteUInt(std::ofstream& ofs, unsigned int input);
 
-void CreateDirectories(std::string str);
 unsigned int GetFileType(const char* szFilePath);
 
 #endif

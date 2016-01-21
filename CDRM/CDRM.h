@@ -1,4 +1,4 @@
-/*
+﻿/*
 	[CDRM] Tomb Raider: Legend/Anniversary/Underworld CDRM Decompressor
 	Copyright (C) Gh0stBlade 2015 - gh0stblade@live[dot]co.uk
 
@@ -24,51 +24,49 @@
 #include <stdio.h>
 #include <sstream>
 
-//Definitions
-#define  CDRM_MAGIC (0x4D524443)
-#define  CDRM_MAX_COMPRESSED_BLOCKS (16777215)
+//Constants
+const unsigned int CDRM_MAGIC = 0x4D524443;
+const unsigned int CDRM_MAX_COMPRESSED_BLOCKS = 16777215;
 
-//Platform specific
-#if PC || XENON || PS3
-#define CDRM_MAX_BLOCK_SIZE (0x40000)
-#define CDRM_FILE_ALIGNMENT (0xF)
-#elif WII
-#define CDRM_MAX_BLOCK_SIZE (0x20000)
-#define CDRM_FILE_ALIGNMENT (0x1F)
+//Platform specific constants
+#if (PC || XENON || PS3)
+	const unsigned int CDRM_MAX_BLOCK_SIZE = 262144;
+	const unsigned short CDRM_FILE_ALIGNMENT = 15;
+#elif (WII)
+	const unsigned int CDRM_MAX_BLOCK_SIZE = 131072;
+	const unsigned short CDRM_FILE_ALIGNMENT = 31;
 #else
-#error "Unsupported Platform!"
+	#error "Unsupported Platform!"
 #endif
 
 //Classes
-class cCDRM
+class CDRM
 {
 	class Entry;
 
 public:
-	void Decompress(char* szFilePath);
-	void Compress(const char* szFilePath, unsigned int uiCompressionMode);
-	void Destroy();
+	void Decompress(const char* filePath);
+	void Compress(const char* filePath, unsigned int compressionMode);
+	CDRM();
+	~CDRM();
 
 private:
-	char* szFilePath;
-
-	unsigned int uiMagic;
-	unsigned int uiNumCompressedBlocks;
-	Entry *pEntries = NULL;
-	
+	unsigned int m_magic;
+	unsigned int m_numCompressedBlocks;
+	Entry *m_pEntries;
 };
 
-class cCDRM::Entry
+class CDRM::Entry
 {
 public:
 	enum Flags;
-	unsigned int uiCompressedSize;
-	unsigned int uiUnCompressedSize;
+	unsigned int m_compressedSize;
+	unsigned int m_uncompressedSize;
 	void DecompressEntry(char* &szCompressedData, char* &szUnCompressedData);
 };
 
 //Enums
-enum cCDRM::Entry::Flags
+enum CDRM::Entry::Flags
 {
 	UNKNOWN = 0,
 	UNCOMPRESSED = 1,
