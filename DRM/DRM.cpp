@@ -127,7 +127,7 @@ void cDRM::ExtractSections(char* szFilePath)
 
 		//Define output file path
 		std::stringstream strOutPath2;
-		strOutPath2 << strOutPath << std::hex << i << szExtensions[section->ucType];
+		strOutPath2 << strOutPath << i << "_" << std::hex << section->uiHash << szExtensions[section->ucType];
 
 		std::stringstream strOutPath3;
 		strOutPath3 << strOutPath << "\\sectionList.txt";
@@ -150,7 +150,7 @@ void cDRM::ExtractSections(char* szFilePath)
 			//Create output sectionList.txt
 			std::ofstream ofs2(strOutPath3.str(), std::ios::app);
 
-			ofs2 << std::hex << i << szExtensions[section->ucType] << std::endl;
+			ofs2 << i << "_" << std::hex << section->uiHash << szExtensions[section->ucType] << std::endl;
 			
 			//If not good to go
 			if (!ofs.good())
@@ -208,7 +208,7 @@ void cDRM::ExtractSections(char* szFilePath)
 			//Create output sectionList.txt
 			std::ofstream ofs2(strOutPath3.str(), std::ios::app);
 
-			ofs2 << std::hex << i << szExtensions[section->ucType] << std::endl;
+			ofs2 << i << "_" << std::hex << section->uiHash << szExtensions[section->ucType] << std::endl;
 
 			//If not good to go
 			if (!ofs.good())
