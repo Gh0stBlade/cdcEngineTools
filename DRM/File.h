@@ -45,6 +45,7 @@ void WriteInt(std::ofstream& ofs, int input);
 void WriteUInt(std::ofstream& ofs, unsigned int input);
 
 void CreateDirectories(std::string str);
-unsigned int GetFileType(const char* szFilePath);
+bool IsDirectory(const char* filePath);
+bool DoesFileExist(const char* filePath);
 
 #endif

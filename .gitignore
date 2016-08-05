@@ -1,0 +1,12 @@
+Obj/*
+Builds/*
+Libs/*
+External/*
+*.sdf
+*.txt
+*.opendb
+*.db
+*.lastbuildstate
+*.idb
+*.tlog
+*.res

@@ -22,6 +22,7 @@
 #include <Shlwapi.h>
 
 #include "PlatformSetup.h"
+#include "File.h"
 
 unsigned int ReverseUInt(unsigned int uiInput)
 {
@@ -158,17 +159,31 @@ void CreateDirectories(std::string str)
 	}
 }
 
-unsigned int GetFileType(const char* szFilePath)
+bool IsDirectory(const char* filePath)
 {
-	std::ifstream ifs(szFilePath, std::ios::binary);
+	int stringSize = strlen(filePath);
 
-	if (!ifs.good())
+	if (stringSize > 0)
 	{
-		std::cout << "Fatal Error: Failed to open file!" << std::endl;
-		return -1;
+		for (int i = stringSize; i > 0; i--)
+		{
+			if (filePath[i] == '.')
+			{
+				return false;
+			}
+
+			if (filePath[i] == '\\')
+			{
+				return true;
+			}
+		}
 	}
 
-	unsigned int uiMagic = ReadUInt(ifs);
-	ifs.close();
-	return uiMagic;
+	return false;
+}
+
+bool DoesFileExist(const char* filePath)
+{
+	std::ifstream file(filePath);
+	return file.good();
 }

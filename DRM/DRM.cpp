@@ -26,26 +26,48 @@
 #include <fstream>
 #include <sstream>
 
+#include <assert.h>
+
+cDRM::cDRM()
+{
+	this->m_version = 0;
+	this->m_numSections = 0;
+	if (this->m_sections.size() > 0)
+	{
+		this->m_sections.clear();
+	}
+}
+
+cDRM::~cDRM()
+{
+	this->m_version = 0;
+	this->m_numSections = 0;
+	if (this->m_sections.size() > 0)
+	{
+		this->m_sections.clear();
+	}
+}
+
 void cDRM::ExtractSections(char* szFilePath)
 {
 	//Store DRM input path
-	this->szFilePath = szFilePath;
+	this->m_filePath = szFilePath;
 
 	//Initialise ifstream for reading in binary mode
-	std::ifstream ifs(this->szFilePath, std::ios::binary);
+	std::ifstream ifs(this->m_filePath, std::ios::binary);
 
 	//If it's not good to go
 	if (!ifs.good())
 	{
-		std::cout << "Fatal Error: Failed to open file at path: " << this->szFilePath << std::endl;
+		std::cout << "Fatal Error: Failed to open file at path: " << this->m_filePath << std::endl;
 		return;
 	}
 
 	//Read our DRM header into cDRM
-	this->uiVersion = ReadUInt(ifs);
-	if (this->uiVersion != DRM_VERSION)
+	this->m_version = ReadUInt(ifs);
+	if (this->m_version != DRM_VERSION)
 	{
-		std::cout << "Fatal Error: Version mis-match! expected: " << DRM_VERSION << " got: " << this->uiVersion << std::endl;
+		std::cout << "Fatal Error: Version mis-match! expected: " << DRM_VERSION << " got: " << this->m_version << std::endl;
 		return;
 	}
 
@@ -56,65 +78,80 @@ void cDRM::ExtractSections(char* szFilePath)
 	this->uiUnk01 = ReadUInt(ifs);
 #endif
 
-	this->uiNumSections = ReadUInt(ifs);
-	if (this->uiNumSections > DRM_MAX_SECTIONS)
+	this->m_numSections = ReadUInt(ifs);
+	if (this->m_numSections > DRM_MAX_SECTIONS)
 	{
-		std::cout << "Fatal Error: Number of Sections: " << this->uiNumSections << " exceeded the limit of: " << DRM_MAX_SECTIONS << "!" << std::endl;
+		std::cout << "Fatal Error: Number of Sections: " << this->m_numSections << " exceeded the limit of: " << DRM_MAX_SECTIONS << "!" << std::endl;
 		return;
 	}
 
 	//If not enough sections
-	if (this->uiNumSections <= 0)
+	if (this->m_numSections <= 0)
 	{
 		std::cout << "Fatal Error: Number of Sections <= 0 !" << std::endl;
 		return;
 	}
 
-	//Allocate our sections
-	this->pSections = new Section[this->uiNumSections];
-
 	//Read all the section info into this
-	for (int i = 0; i != this->uiNumSections; i++)
+	for (int i = 0; i != this->m_numSections; i++)
 	{
-		this->pSections[i].uiSize = ReadUInt(ifs);
-		this->pSections[i].ucType = ReadUByte(ifs);
-		this->pSections[i].ucUnk00 = ReadUByte(ifs);
-		this->pSections[i].usUnk01 = ReadUShort(ifs);
-		this->pSections[i].uiHeaderSize = ReadUInt(ifs);
-		this->pSections[i].uiHash = ReadUInt(ifs);
-		this->pSections[i].uiLang = ReadUInt(ifs);
+		this->m_sections.emplace_back();
+		Section* section = &this->m_sections[this->m_sections.size() - 1];
+
+		section->uiSize = ReadUInt(ifs);
+		section->ucType = ReadUByte(ifs);
+		section->ucUnk00 = ReadUByte(ifs);
+		section->usUnk01 = ReadUShort(ifs);
+		section->uiHeaderSize = ReadUInt(ifs);
+		section->uiHash = ReadUInt(ifs);
+		section->uiLang = ReadUInt(ifs);
 	}
 
 #if TR8
 	//Skip past names & padding info
-	ifs.seekg(this->uiNameSize + this->uiPaddingSize, SEEK_CUR);
+	ifs.seekg(this->m_nameSize + this->m_paddingSize, SEEK_CUR);
 #endif
 
-	std::string strOutPath = std::string(this->szFilePath);
+	std::string strOutPath = std::string(this->m_filePath);
 	strOutPath = strOutPath.substr(0, strOutPath.find_last_of(".")) + "\\";;
 
 	//Create Directories
 	CreateDirectories(strOutPath);
 
-	for (int i = 0; i != this->uiNumSections; i++)
+	for (int i = 0; i != this->m_numSections; i++)
 	{
+		Section* section = &this->m_sections[i];
+
 		//Print extraction message to console
-		std::cout << "Extracting Section: " << "[ " << (i + 1) << " / " << this->uiNumSections << " ]" << std::endl;
+		std::cout << "Extracting Section: " << "[ " << (i + 1) << " / " << this->m_numSections << " ]" << std::endl;
 
 		//Define output file path
 		std::stringstream strOutPath2;
-		strOutPath2 << strOutPath << std::hex << i << szExtensions[this->pSections[i].ucType];
+		strOutPath2 << strOutPath << std::hex << i << szExtensions[section->ucType];
+
+		std::stringstream strOutPath3;
+		strOutPath3 << strOutPath << "\\sectionList.txt";
 
 		//Skip header
+#if REPACK_MODE
+		bool bRealSize = false;//Don't modify
+#else
 		bool bRealSize = true;
+#endif
+		
 		if (bRealSize)
 		{
 			//Declare variables to store data
-			char* szSectionData = new char[this->pSections[i].uiSize];
+			char* szSectionData = new char[section->uiSize];
 
 			//Declare output file stream
 			std::ofstream ofs(strOutPath2.str(), std::ios::binary);
 
+			//Create output sectionList.txt
+			std::ofstream ofs2(strOutPath3.str(), std::ios::app);
+
+			ofs2 << std::hex << i << szExtensions[section->ucType] << std::endl;
+			
 			//If not good to go
 			if (!ofs.good())
 			{
@@ -124,19 +161,34 @@ void cDRM::ExtractSections(char* szFilePath)
 
 			//Skip header info
 #if TR7 || TRAE
-			ifs.seekg(((this->pSections[i].uiHeaderSize >> 0x8) * 0x8), SEEK_CUR);
+			ifs.seekg(((section->uiHeaderSize >> 0x8) * 0x8), SEEK_CUR);
 #elif TR8
-			ifs.seekg((this->pSections[i].uiHeaderSize >> 0x8), SEEK_CUR);
+			ifs.seekg((section->uiHeaderSize >> 0x8), SEEK_CUR);
 #else
 #error "Unsupported Game!"
 #endif
 			//Read then write the section data
-			ifs.read(szSectionData, this->pSections[i].uiSize);
-			ofs.write(szSectionData, this->pSections[i].uiSize);
+			ifs.read(szSectionData, section->uiSize);
+#if REPACK_MODE && (TR7 || TRAE)
+			//Write section header
+			WriteUInt(ofs, 0x54434553);
+			WriteUInt(ofs, section->uiSize);
+			WriteUByte(ofs, section->ucType);
+			WriteUByte(ofs, section->ucUnk00);
+			WriteUShort(ofs, section->usUnk01);
+			WriteUInt(ofs, section->uiHeaderSize);
+			WriteUInt(ofs, section->uiHash);
+			WriteUInt(ofs, section->uiLang);
+#endif
+			ofs.write(szSectionData, section->uiSize);
 			
 			//Flush and close ofstream
 			ofs.flush();
 			ofs.close();
+
+			//
+			ofs2.flush();
+			ofs2.close();
 
 			//delete allocated section data
 			delete[] szSectionData;
@@ -145,13 +197,18 @@ void cDRM::ExtractSections(char* szFilePath)
 		{
 			//Declare char* to store section data
 #if TR7 || TRAE
-			char* szSectionData = new char[this->pSections[i].uiSize + ((this->pSections[i].uiHeaderSize >> 0x8) * 0x8)];
+			char* szSectionData = new char[section->uiSize + ((section->uiHeaderSize >> 0x8) * 0x8)];
 #elif TR8
-			char* szSectionData = new char[this->pSections[i].uiSize + (this->pSections[i].uiHeaderSize >> 0x8)];
+			char* szSectionData = new char[section->uiSize + (section->uiHeaderSize >> 0x8)];
 #endif
 
 			//Declare output file stream
 			std::ofstream ofs(strOutPath2.str(), std::ios::binary);
+
+			//Create output sectionList.txt
+			std::ofstream ofs2(strOutPath3.str(), std::ios::app);
+
+			ofs2 << std::hex << i << szExtensions[section->ucType] << std::endl;
 
 			//If not good to go
 			if (!ofs.good())
@@ -162,17 +219,32 @@ void cDRM::ExtractSections(char* szFilePath)
 
 			//Read then write the section data
 #if TR7 || TRAE
-			ifs.read(szSectionData, this->pSections[i].uiSize + ((this->pSections[i].uiHeaderSize >> 0x8) * 0x8));
-			ofs.write(szSectionData, this->pSections[i].uiSize + ((this->pSections[i].uiHeaderSize >> 0x8) * 0x8));
+			ifs.read(szSectionData, section->uiSize + ((section->uiHeaderSize >> 0x8) * 0x8));
+#if REPACK_MODE
+			//Write section header
+			WriteUInt(ofs, 0x54434553);
+			WriteUInt(ofs, section->uiSize);
+			WriteUByte(ofs, section->ucType);
+			WriteUByte(ofs, section->ucUnk00);
+			WriteUShort(ofs, section->usUnk01);
+			WriteUInt(ofs, section->uiHeaderSize);
+			WriteUInt(ofs, section->uiHash);
+			WriteUInt(ofs, section->uiLang);
+#endif
+			ofs.write(szSectionData, section->uiSize + ((section->uiHeaderSize >> 0x8) * 0x8));
 #elif TR8
-			ifs.read(szSectionData, this->pSections[i].uiSize + (this->pSections[i].uiHeaderSize >> 0x8));
-			ofs.write(szSectionData, this->pSections[i].uiSize + (this->pSections[i].uiHeaderSize >> 0x8));
+			ifs.read(szSectionData, section->uiSize + (section->uiHeaderSize >> 0x8));
+			ofs.write(szSectionData, section->uiSize + (section->uiHeaderSize >> 0x8));
 #else
 #error "Unsupported Game!"
 #endif
 			//Flush and close ofstream
 			ofs.flush();
 			ofs.close();
+
+			//Flush and close ofstream
+			ofs2.flush();
+			ofs2.close();
 
 			//Delete allocated section data
 			delete[] szSectionData;
@@ -183,11 +255,5 @@ void cDRM::ExtractSections(char* szFilePath)
 	ifs.close();
 
 	//Print success
-	std::cout << "Successfully Extracted: " << "[ " << (this->uiNumSections) << " ] " << " section(s)!" << std::endl;
-}
-
-void cDRM::Destroy()
-{
-	if (this->pSections != NULL && this->uiNumSections > 0)
-		delete[] this->pSections;
+	std::cout << "Successfully Extracted: " << "[ " << (this->m_numSections) << " ] " << " section(s)!" << std::endl;
 }

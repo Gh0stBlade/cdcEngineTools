@@ -145,19 +145,6 @@ void WriteUInt(std::ofstream& ofs, unsigned int input)
 	ofs.write((char*)&val, sizeof(unsigned int));
 }
 
-void CreateDirectories(std::string str)
-{
-	//Little fix for strings which accidentally don't end with \\. If not the last folder won't be created!
-	if (str[str.size() - 1] != *"\\") str.append("\\");
-
-	int iPos = 1;
-	while (iPos != 0)
-	{
-		iPos = str.find("\\", iPos) + 1;
-		CreateDirectory(str.substr(0, iPos).c_str(), NULL);
-	}
-}
-
 unsigned int GetFileType(const char* szFilePath)
 {
 	std::ifstream ifs(szFilePath, std::ios::binary);
