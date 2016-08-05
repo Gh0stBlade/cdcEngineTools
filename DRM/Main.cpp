@@ -38,7 +38,18 @@ int main(int argc, char* argv[])
 	{
 		if (IsDirectory(argv[1]))
 		{
-			system("Pause");
+			char buff[128];
+			sprintf_s(buff, "%s%s", argv[1], "\\sectionList.txt");//unsafe
+
+			if (DoesFileExist(buff))
+			{
+				system("Pause");
+			}
+			else
+			{
+				std::cout << "Warning failed to locate section list!" << std::endl;
+				system("Pause");
+			}
 		}
 		else
 		{

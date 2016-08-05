@@ -181,3 +181,9 @@ bool IsDirectory(const char* filePath)
 
 	return false;
 }
+
+bool DoesFileExist(const char* filePath)
+{
+	std::ifstream file(filePath);
+	return file.good();
+}

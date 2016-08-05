@@ -129,8 +129,11 @@ void cDRM::ExtractSections(char* szFilePath)
 		std::stringstream strOutPath2;
 		strOutPath2 << strOutPath << std::hex << i << szExtensions[section->ucType];
 
+		std::stringstream strOutPath3;
+		strOutPath3 << strOutPath << "\\sectionList.txt";
+
 		//Skip header
-		bool bRealSize = false;
+		bool bRealSize = true;
 		if (bRealSize)
 		{
 			//Declare variables to store data
@@ -139,6 +142,11 @@ void cDRM::ExtractSections(char* szFilePath)
 			//Declare output file stream
 			std::ofstream ofs(strOutPath2.str(), std::ios::binary);
 
+			//Create output sectionList.txt
+			std::ofstream ofs2(strOutPath3.str(), std::ios::app);
+
+			ofs2 << std::hex << i << szExtensions[section->ucType] << std::endl;
+			
 			//If not good to go
 			if (!ofs.good())
 			{
@@ -156,11 +164,26 @@ void cDRM::ExtractSections(char* szFilePath)
 #endif
 			//Read then write the section data
 			ifs.read(szSectionData, section->uiSize);
+#if REPACK_MODE && (TR7 || TRAE)
+			//Write section header
+			WriteUInt(ofs, 0x54434553);
+			WriteUInt(ofs, section->uiSize);
+			WriteUByte(ofs, section->ucType);
+			WriteUByte(ofs, section->ucUnk00);
+			WriteUShort(ofs, section->usUnk01);
+			WriteUInt(ofs, section->uiHeaderSize);
+			WriteUInt(ofs, section->uiHash);
+			WriteUInt(ofs, section->uiLang);
+#endif
 			ofs.write(szSectionData, section->uiSize);
 			
 			//Flush and close ofstream
 			ofs.flush();
 			ofs.close();
+
+			//
+			ofs2.flush();
+			ofs2.close();
 
 			//delete allocated section data
 			delete[] szSectionData;
@@ -176,6 +199,11 @@ void cDRM::ExtractSections(char* szFilePath)
 
 			//Declare output file stream
 			std::ofstream ofs(strOutPath2.str(), std::ios::binary);
+
+			//Create output sectionList.txt
+			std::ofstream ofs2(strOutPath3.str(), std::ios::app);
+
+			ofs2 << std::hex << i << szExtensions[section->ucType] << std::endl;
 
 			//If not good to go
 			if (!ofs.good())
@@ -197,6 +225,10 @@ void cDRM::ExtractSections(char* szFilePath)
 			//Flush and close ofstream
 			ofs.flush();
 			ofs.close();
+
+			//Flush and close ofstream
+			ofs2.flush();
+			ofs2.close();
 
 			//Delete allocated section data
 			delete[] szSectionData;
