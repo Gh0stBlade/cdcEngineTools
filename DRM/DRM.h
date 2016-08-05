@@ -50,11 +50,13 @@ class cDRM
 {
 
 public:
+	cDRM();
+	~cDRM();
+
 	void ExtractSections(char* szFilePath);
-	void Destroy();
 
 private:
-	char* szFilePath;
+	char* m_filePath;
 	unsigned int m_version;
 
 #if TR8

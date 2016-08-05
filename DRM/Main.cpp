@@ -23,6 +23,7 @@
 #include "DRM.h"
 #include "Game.h"
 #include "PlatformSetup.h"
+#include "File.h"
 
 void PrintToolInfo();
 void PrintToolUsage();
@@ -35,9 +36,15 @@ int main(int argc, char* argv[])
 	//If there are args to process.
 	if (argc == 2)
 	{
-		cDRM mDRM;
-		mDRM.ExtractSections(argv[1]);
-		mDRM.Destroy();
+		if (IsDirectory(argv[1]))
+		{
+			system("Pause");
+		}
+		else
+		{
+			cDRM mDRM;
+			mDRM.ExtractSections(argv[1]);
+		}
 	}
 	else
 	{

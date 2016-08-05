@@ -28,18 +28,38 @@
 
 #include <assert.h>
 
+cDRM::cDRM()
+{
+	this->m_version = 0;
+	this->m_numSections = 0;
+	if (this->m_sections.size() > 0)
+	{
+		this->m_sections.clear();
+	}
+}
+
+cDRM::~cDRM()
+{
+	this->m_version = 0;
+	this->m_numSections = 0;
+	if (this->m_sections.size() > 0)
+	{
+		this->m_sections.clear();
+	}
+}
+
 void cDRM::ExtractSections(char* szFilePath)
 {
 	//Store DRM input path
-	this->szFilePath = szFilePath;
+	this->m_filePath = szFilePath;
 
 	//Initialise ifstream for reading in binary mode
-	std::ifstream ifs(this->szFilePath, std::ios::binary);
+	std::ifstream ifs(this->m_filePath, std::ios::binary);
 
 	//If it's not good to go
 	if (!ifs.good())
 	{
-		std::cout << "Fatal Error: Failed to open file at path: " << this->szFilePath << std::endl;
+		std::cout << "Fatal Error: Failed to open file at path: " << this->m_filePath << std::endl;
 		return;
 	}
 
@@ -92,7 +112,7 @@ void cDRM::ExtractSections(char* szFilePath)
 	ifs.seekg(this->m_nameSize + this->m_paddingSize, SEEK_CUR);
 #endif
 
-	std::string strOutPath = std::string(this->szFilePath);
+	std::string strOutPath = std::string(this->m_filePath);
 	strOutPath = strOutPath.substr(0, strOutPath.find_last_of(".")) + "\\";;
 
 	//Create Directories
@@ -188,12 +208,4 @@ void cDRM::ExtractSections(char* szFilePath)
 
 	//Print success
 	std::cout << "Successfully Extracted: " << "[ " << (this->m_numSections) << " ] " << " section(s)!" << std::endl;
-}
-
-void cDRM::Destroy()
-{
-	if (this->m_sections.size() > 0)
-	{
-		this->m_sections.clear();
-	}
 }
