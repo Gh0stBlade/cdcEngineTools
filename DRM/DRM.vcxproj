@@ -954,6 +954,7 @@
     <ClCompile Include="DRM.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Repack.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DRM.h" />
@@ -961,6 +962,7 @@
     <ClInclude Include="FileExtensions.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="PlatformSetup.h" />
+    <ClInclude Include="Repack.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DRM.rc" />

@@ -133,7 +133,12 @@ void cDRM::ExtractSections(char* szFilePath)
 		strOutPath3 << strOutPath << "\\sectionList.txt";
 
 		//Skip header
+#if REPACK_MODE
+		bool bRealSize = false;//Don't modify
+#else
 		bool bRealSize = true;
+#endif
+		
 		if (bRealSize)
 		{
 			//Declare variables to store data
@@ -215,6 +220,17 @@ void cDRM::ExtractSections(char* szFilePath)
 			//Read then write the section data
 #if TR7 || TRAE
 			ifs.read(szSectionData, section->uiSize + ((section->uiHeaderSize >> 0x8) * 0x8));
+#if REPACK_MODE
+			//Write section header
+			WriteUInt(ofs, 0x54434553);
+			WriteUInt(ofs, section->uiSize);
+			WriteUByte(ofs, section->ucType);
+			WriteUByte(ofs, section->ucUnk00);
+			WriteUShort(ofs, section->usUnk01);
+			WriteUInt(ofs, section->uiHeaderSize);
+			WriteUInt(ofs, section->uiHash);
+			WriteUInt(ofs, section->uiLang);
+#endif
 			ofs.write(szSectionData, section->uiSize + ((section->uiHeaderSize >> 0x8) * 0x8));
 #elif TR8
 			ifs.read(szSectionData, section->uiSize + (section->uiHeaderSize >> 0x8));

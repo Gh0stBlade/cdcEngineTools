@@ -24,6 +24,7 @@
 #include "Game.h"
 #include "PlatformSetup.h"
 #include "File.h"
+#include "Repack.h"
 
 void PrintToolInfo();
 void PrintToolUsage();
@@ -43,7 +44,7 @@ int main(int argc, char* argv[])
 
 			if (DoesFileExist(buff))
 			{
-				system("Pause");
+				RepackSections(buff, argv[1]);
 			}
 			else
 			{
