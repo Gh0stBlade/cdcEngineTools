@@ -21,6 +21,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <iostream>
 
 #include "PCD.h"
+#include "File.h"
+#include "DDS.h"
 
 void PrintToolInfo();
 void PrintToolUsage();
@@ -33,7 +35,17 @@ int main(int argc, char* argv[])
 	//If there are args to process.
 	if (argc == 2)
 	{
-		ConvertPCDToDDS(argv[1]);
+		unsigned int fileMagic = getFileMagic(argv[1]);
+
+		switch (fileMagic)
+		{
+		case 0x39444350:
+			ConvertPCDToDDS(argv[1]);
+			break;
+		case 0x20534444:
+			ConvertDDSToPCD(argv[1]);
+			break;
+		}
 	}
 	else
 	{

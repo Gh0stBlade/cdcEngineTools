@@ -23,7 +23,7 @@ enum PCDFlags
 	FILTER_INVALID = 0x200,
 };
 
-#pragma pack (push, 1)
+#pragma pack(push, 1)
 struct PCTextureDataHeader
 {
 	unsigned int m_magic;
@@ -37,7 +37,7 @@ struct PCTextureDataHeader
 	unsigned short m_flags;
 };
 
-#pragma pack(pop, 1)
+#pragma pack(pop)
 
 void ConvertPCDToDDS(const char* filePath);
 
