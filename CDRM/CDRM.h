@@ -23,9 +23,10 @@
 //Includes
 #include <stdio.h>
 #include <sstream>
+#include <vector>
 
 //Constants
-const unsigned int CDRM_MAGIC = 0x4D524443;
+const unsigned int CDRM_MAGIC = 0x4D524443;///@TODO Endian big!
 const unsigned int CDRM_MAX_COMPRESSED_BLOCKS = 16777215;
 
 //Platform specific constants
@@ -39,41 +40,40 @@ const unsigned int CDRM_MAX_COMPRESSED_BLOCKS = 16777215;
 	#error "Unsupported Platform!"
 #endif
 
+//Structs
+struct CDRMEntry
+{
+	unsigned int m_compressedSize;
+	unsigned int m_uncompressedSize;
+};
+
 //Classes
 class CDRM
 {
-	class Entry;
-
 public:
-	void Decompress(const char* filePath);
-	void Compress(const char* filePath, unsigned int compressionMode);
 	CDRM();
 	~CDRM();
+
+	void Decompress(const char* filePath);
+	void Compress(const char* filePath, unsigned int compressionMode);
 
 private:
 	unsigned int m_magic;
 	unsigned int m_numCompressedBlocks;
-	Entry *m_pEntries;
+	std::vector<CDRMEntry> m_entries;
 };
 
-class CDRM::Entry
-{
-public:
-	enum Flags;
-	unsigned int m_compressedSize;
-	unsigned int m_uncompressedSize;
-	void DecompressEntry(char* &szCompressedData, char* &szUnCompressedData);
-};
 
 //Enums
-enum CDRM::Entry::Flags
+enum CDRMFlags
 {
-	UNKNOWN = 0,
+	NONE = 0,
 	UNCOMPRESSED = 1,
 	COMPRESSED = 2
 };
 
 void CompressData(char* szUncompressedData, unsigned int uiUncompressedSize, std::string &strOutData);
+void DecompressData(char* &szCompressedData, unsigned int compressedSize, char* &szUnCompressedData, unsigned int uncompressedSize);
 
 #endif
 

@@ -17,23 +17,20 @@
 	Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-#define ZLIB_WINAPI
-#define CHUNK 32768
-
 #include "CDRM.h"
 #include "File.h"
+
+#define ZLIB_WINAPI
+#define CHUNK 32768
 #include "..\External\zlib\zlib.h"
 
-#include <stdio.h>
 #include <iostream>
-#include <fstream>
-#include <sstream>
 
 CDRM::CDRM()
 {
 	this->m_magic = 0;
 	this->m_numCompressedBlocks = 0;
-	this->m_pEntries = nullptr;
+	this->m_entries.clear();
 }
 
 void CDRM::Compress(const char* filePath, unsigned int compressionMode)
@@ -88,7 +85,7 @@ void CDRM::Compress(const char* filePath, unsigned int compressionMode)
 		ifs.read(szUncompressedData, (uncompressedSize >> 8));
 		
 		//Compress the uncompressed data
-		if (compressionMode == CDRM::Entry::COMPRESSED)
+		if (compressionMode == CDRMFlags::COMPRESSED)
 		{
 			//Compress the data
 			CompressData(szUncompressedData, (uncompressedSize >> 8), strCompressedData);
@@ -194,11 +191,11 @@ void CDRM::Decompress(const char* filePath)
 	}
 
 	//Read entry info
-	this->m_pEntries = new Entry[this->m_numCompressedBlocks];
 	for (int i = 0; i != this->m_numCompressedBlocks; i++)
 	{
-		this->m_pEntries[i].m_uncompressedSize = ReadUInt(ifs);
-		this->m_pEntries[i].m_compressedSize = ReadUInt(ifs);
+		this->m_entries.emplace_back();
+		this->m_entries[i].m_uncompressedSize = ReadUInt(ifs);
+		this->m_entries[i].m_compressedSize = ReadUInt(ifs);
 	}
 
 	//Skip according to alignment
@@ -211,14 +208,14 @@ void CDRM::Decompress(const char* filePath)
 		std::cout << "Decompressing Section: " << "[ " << (i + 1) << " / " << this->m_numCompressedBlocks << " ]" << std::endl;
 
 		//Declare our uncompressed/compressed buffers where our data is/going to be stored.
-		char* compressedData = new char[this->m_pEntries[i].m_compressedSize];
-		char* uncompressedData = new char[this->m_pEntries[i].m_uncompressedSize >> 8];
+		char* compressedData = new char[this->m_entries[i].m_compressedSize];
+		char* uncompressedData = new char[this->m_entries[i].m_uncompressedSize >> 8];
 
 #if DEBUG
 		std::cout << "Start Offset: " << ifs.tellg() << " i:" << i << std::endl;
 #endif
 		//Read the compressed Zlib data into compressedData
-		ifs.read(compressedData, this->m_pEntries[i].m_compressedSize);
+		ifs.read(compressedData, this->m_entries[i].m_compressedSize);
 
 #if DEBUG
 		std::cout << "End Offset: " << ifs.tellg() << " i:" << i << std::endl;
@@ -227,9 +224,9 @@ void CDRM::Decompress(const char* filePath)
 		ifs.seekg((((unsigned int)ifs.tellg() + CDRM_FILE_ALIGNMENT) & ~CDRM_FILE_ALIGNMENT));
 
 		//If data is compressed, decompress the compressed data otherwise do nothing!
-		if ((this->m_pEntries[i].m_uncompressedSize & 0xFF) == CDRM::Entry::COMPRESSED)
+		if ((this->m_entries[i].m_uncompressedSize & 0xFF) == CDRMFlags::COMPRESSED)
 		{
-			this->m_pEntries[i].DecompressEntry(compressedData, uncompressedData);
+			DecompressData(compressedData, this->m_entries[i].m_compressedSize, uncompressedData, (this->m_entries[i].m_uncompressedSize >> 8));
 
 			//Write decompressed blocks to a temporary file
 			std::ofstream ofs("temp.bin", std::ios::binary | std::ios::app);
@@ -238,18 +235,20 @@ void CDRM::Decompress(const char* filePath)
 			if (!ofs.good())
 			{
 				std::cout << "Fatal Error: Unknown error occured whilst initialising ofstream!" << std::endl;
+				ofs.close();
+				ifs.close();
 				return;
 			}
 
 			//Skip to EOF and write uncompressed data
 			ofs.seekp(0, std::ios::end);
-			ofs.write(uncompressedData, (this->m_pEntries[i].m_uncompressedSize >> 8));
+			ofs.write(uncompressedData, (this->m_entries[i].m_uncompressedSize >> 8));
 
 			//Flush and close ofstream
 			ofs.flush();
 			ofs.close();
 		}
-		else if ((this->m_pEntries[i].m_uncompressedSize & 0xFF) == CDRM::Entry::UNCOMPRESSED)
+		else if ((this->m_entries[i].m_uncompressedSize & 0xFF) == CDRMFlags::UNCOMPRESSED)
 		{
 			//Write uncompressed blocks to a temporary file
 			std::ofstream ofs("temp.bin", (std::ios::binary | std::ios::app));
@@ -258,12 +257,14 @@ void CDRM::Decompress(const char* filePath)
 			if (!ofs.good())
 			{
 				std::cout << "Fatal Error: Unknown error occured whilst initialising ofstream!" << std::endl;
+				ifs.close();
+				ifs.close();
 				return;
 			}
 
 			//Skip to EOF and write uncompressed data
 			ofs.seekp(0, std::ios::end);
-			ofs.write(compressedData, (this->m_pEntries[i].m_compressedSize));
+			ofs.write(compressedData, this->m_entries[i].m_compressedSize);
 
 			//Flush and close ofstream
 			ofs.flush();
@@ -271,7 +272,7 @@ void CDRM::Decompress(const char* filePath)
 		}
 		else
 		{
-			std::cout << "Fatal Error: Unknown Compression flag: " << std::to_string((this->m_pEntries[i].m_uncompressedSize & 0xFF)) << std::endl;
+			std::cout << "Fatal Error: Unknown Compression flag: " << std::to_string((this->m_entries[i].m_uncompressedSize & 0xFF)) << std::endl;
 			system("Pause");
 		}
 
@@ -293,7 +294,7 @@ void CDRM::Decompress(const char* filePath)
 	std::cout << "Successfully Decompressed: " << "[ " << (this->m_numCompressedBlocks) << " ] " << " section(s)!" << std::endl;
 }
 
-void CDRM::Entry::DecompressEntry(char* &szCompressedData, char* &szUnCompressedData)
+void DecompressData(char* &compressedData, unsigned int compressedSize, char* &uncompressedData, unsigned int uncompressedSize)
 {
 	//Declare zlib inflate stream as strm and our place to return errors, ret
 	z_stream strm;
@@ -315,10 +316,10 @@ void CDRM::Entry::DecompressEntry(char* &szCompressedData, char* &szUnCompressed
 	}
 
 	//Tell Zlib where to find the data and their sizes
-	strm.avail_in = this->m_compressedSize;//Compressed Size
-	strm.next_in = (Bytef *)szCompressedData;//Compressed data char*
-	strm.avail_out = this->m_uncompressedSize;//UnCompressed Size
-	strm.next_out = (Bytef *)szUnCompressedData; //Uncompressed data char*
+	strm.avail_in = compressedSize;//Compressed Size
+	strm.next_in = (Bytef *)compressedData;//Compressed data char*
+	strm.avail_out = uncompressedSize;//UnCompressed Size
+	strm.next_out = (Bytef *)uncompressedData; //Uncompressed data char*
 
 	//Inflate the stream itself
 	ret = inflate(&strm, Z_NO_FLUSH);
@@ -387,12 +388,11 @@ void CompressData(char* szUncompressedData, unsigned int uiUncompressedSize, std
 
 CDRM::~CDRM()
 {
-	if (this->m_pEntries != nullptr && this->m_numCompressedBlocks > 0)
+	if (this->m_entries.size() > 0 && this->m_numCompressedBlocks > 0)
 	{
-		delete[] this->m_pEntries;
+		this->m_entries.clear();
 	}
 
 	this->m_magic = 0;
 	this->m_numCompressedBlocks = 0;
-	this->m_pEntries = nullptr;
 }
