@@ -49,7 +49,27 @@ void ConvertDDSToPCD(const char* filePath)
 	unsigned int sectionFileSize = pcdTextureDataSize + 0x18;
 	unsigned int Type = 0x5;
 	unsigned int headerSize = 0;
-	unsigned int hash = 0xFF;///@FIXME grab from file name? check drm original struct to see what this is
+
+	//
+	std::string path(filePath);
+	std::string filename;
+
+	size_t pos = path.find_last_of("\\");
+	if (pos != std::string::npos)
+	{
+		filename.assign(path.begin() + pos + 1, path.end());
+		pos = path.find_last_of("_");
+		filename.assign(path.begin() + pos + 1, path.end());
+		filename.erase(filename.find_first_of("."), std::string::npos);
+	}
+	else
+	{
+		filename = path;
+	}
+
+	unsigned int hash;
+	sscanf(filename.c_str(), "%x", &hash);
+
 	unsigned int lang = 0xFFFFFFFF;
 	ofs.write((char*)&sectionMagic, sizeof(unsigned int));
 	ofs.write((char*)&sectionFileSize, sizeof(unsigned int));
