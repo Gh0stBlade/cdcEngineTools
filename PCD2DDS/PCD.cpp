@@ -1,4 +1,5 @@
 #include "PCD.h"
+#include "File.h"
 
 #include <iostream>
 #include <fstream>
@@ -10,18 +11,52 @@ void ConvertPCDToDDS(const char* filePath)
 	//If there was a failure to open the file we must exit
 	if (!ifs.good())
 	{
+		std::cout << "Error: failed to open the file!" << std::endl;
+		ifs.close();
+		return;
+	}
+
+	//Check to see if file has valid section header
+	unsigned int sectionMagic = ReadUInt(ifs);
+	if (sectionMagic != SECTION_MAGIC)
+	{
+		std::cout << "Error: section magic mis-match!" << std::endl;
+		ifs.close();
+		return;
+	}
+
+	unsigned int sectionSize = ReadUInt(ifs);
+	if (sectionSize <= 0)
+	{
+		std::cout << "Error: section corrupt, size is <= 0!" << std::endl;
+		ifs.close();
+		return;
+	}
+
+	unsigned char sectionType = ReadUByte(ifs);
+	if (sectionType != TEXTURE_SECTION_TYPE)
+	{
+		std::cout << "Error: invalid section type!" << std::endl;
 		ifs.close();
 		return;
 	}
 
 	//Skip past section header
-	ifs.seekg(0x18, SEEK_SET);
+	ifs.seekg(24, SEEK_SET);
 
 	//Load texture data header
 	char* fileBuffer = new char[sizeof(PCTextureDataHeader)];
 	ifs.read(fileBuffer, sizeof(PCTextureDataHeader));
+	
 	PCTextureDataHeader* pcdHeader = nullptr;
 	pcdHeader = (PCTextureDataHeader*)fileBuffer;
+	if (pcdHeader->m_magic != PCD_MAGIC)
+	{
+		std::cout << "Error PCD magic mis-match!" << std::endl;
+		ifs.close();
+		return;
+	}
+	
 	char* textureData = new char[pcdHeader->m_textureDataSize];
 	ifs.read(textureData, pcdHeader->m_textureDataSize);
 	ifs.close();
@@ -32,7 +67,6 @@ void ConvertPCDToDDS(const char* filePath)
 
 	std::ofstream ofs(nameBuff, std::ios::binary);
 
-	unsigned int ddsMagic = 0x20534444;
 	unsigned int ddsSize = 0x7C;
 	unsigned int ddsFlags = 0x000A1007;
 	unsigned int ddsPitchOrLinearSize = 0x00010000;
@@ -44,24 +78,24 @@ void ConvertPCDToDDS(const char* filePath)
 	unsigned int ddsFormat = pcdHeader->m_format;
 	unsigned int ddsUnk00 = 0x00401008;
 
-	ofs.write((char*)&ddsMagic, sizeof(unsigned int));
-	ofs.write((char*)&ddsSize, sizeof(unsigned int));
-	ofs.write((char*)&ddsFlags, sizeof(unsigned int));
-	ofs.write((char*)&ddsHeight, sizeof(unsigned int));
+	WriteUInt(ofs, DDS_MAGIC);
+	WriteUInt(ofs, ddsSize);
+	WriteUInt(ofs, ddsFlags);
+	WriteUInt(ofs, ddsHeight);
 
-	ofs.write((char*)&ddsWidth, sizeof(unsigned int));
-	ofs.write((char*)&ddsPitchOrLinearSize, sizeof(unsigned int));
-	ofs.write((char*)&ddsDummy, sizeof(unsigned int));
-	ofs.write((char*)&ddsDepth, sizeof(unsigned int));
+	WriteUInt(ofs, ddsWidth);
+	WriteUInt(ofs, ddsPitchOrLinearSize);
+	WriteUInt(ofs, ddsDummy);
+	WriteUInt(ofs, ddsDepth);
 
-	ofs.write((char*)&ddsMipCount, sizeof(unsigned int));
+	WriteUInt(ofs, ddsMipCount);
 
 	//Reserved
 	ofs.seekp(12 * sizeof(unsigned int), SEEK_CUR);
 
-	ofs.write((char*)&ddsFormat, sizeof(unsigned int));
+	WriteUInt(ofs, ddsFormat);
 	ofs.seekp(0x14, SEEK_CUR);
-	ofs.write((char*)&ddsUnk00, sizeof(unsigned int));
+	WriteUInt(ofs, ddsUnk00);
 	ofs.seekp(0x10, SEEK_CUR);
 
 	ofs.write(textureData, pcdHeader->m_textureDataSize);

@@ -1,6 +1,11 @@
 #ifndef PCD_H
 #define PCD_H
 
+#define SECTION_MAGIC (0x54434553)
+#define PCD_MAGIC     (0x39444350)
+#define DDS_MAGIC     (0x20534444)
+#define TEXTURE_SECTION_TYPE (5)
+
 enum PCDFormat
 {
 	DXT1 = 0x31545844,
