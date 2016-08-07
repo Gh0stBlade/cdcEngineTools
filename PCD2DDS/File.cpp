@@ -1,7 +1,43 @@
+#include <fstream>
+#include <iostream>
+#include <Shlwapi.h>
+
+
 #include "File.h"
 
-#include <iostream>
-#include <fstream>
+unsigned int getFileMagic(const char* filePath)
+{
+	std::ifstream ifs(filePath, std::ios::binary);
+	unsigned int fileMagic = 0;
+
+	if (ifs.good())
+	{
+		ifs.read((char*)&fileMagic, sizeof(unsigned int));
+		return fileMagic;
+	}
+
+	return fileMagic;
+}
+
+unsigned int ReverseUInt(unsigned int uiInput)
+{
+	return (unsigned int)(((uiInput & 0xFFu) << 24) | ((uiInput & 0xFF00u) << 8) | ((uiInput & 0xFF0000u) >> 8) | ((uiInput & 0xFF000000u) >> 24));
+}
+
+int ReverseInt(int iInput)
+{
+	return (int)(((iInput & 0xFF) << 24) | ((iInput & 0xFF00u) << 8) | ((iInput & 0xFF0000u) >> 8) | ((iInput & 0xFF000000u) >> 24));
+}
+
+unsigned short ReverseUShort(unsigned short usInput)
+{
+	return (unsigned short)((usInput >> 8) | (usInput << 8));
+}
+
+short ReverseShort(short sInput)
+{
+	return (short)((sInput >> 8) | (sInput << 8));
+}
 
 char ReadByte(std::ifstream& ifs)
 {
@@ -107,15 +143,7 @@ void WriteUInt(std::ofstream& ofs, unsigned int input)
 
 void CreateDirectories(std::string str)
 {
-	//Little fix for strings which accidentally don't end with \\. If not the last folder won't be created!
-	if (str[str.size() - 1] != *"\\") str.append("\\");
 
-	int iPos = 1;
-	while (iPos != 0)
-	{
-		iPos = str.find("\\", iPos) + 1;
-		//CreateDirectory(str.substr(0, iPos).c_str(), NULL);
-	}
 }
 
 bool IsDirectory(const char* filePath)
@@ -145,28 +173,4 @@ bool DoesFileExist(const char* filePath)
 {
 	std::ifstream file(filePath);
 	return file.good();
-}
-
-
-unsigned int getFileMagic(const char* filePath)
-{
-	std::ifstream ifs(filePath, std::ios::binary);
-	unsigned int fileMagic = 0;
-
-	if (ifs.good())
-	{
-		
-		ifs.read((char*)&fileMagic, sizeof(unsigned int));
-
-		if (fileMagic == 0x54434553)
-		{
-			//Skip past section header
-			ifs.seekg(0x14, SEEK_CUR);
-
-			ifs.read((char*)&fileMagic, sizeof(unsigned int));
-			return fileMagic;
-		}
-	}
-
-	return fileMagic;
 }
