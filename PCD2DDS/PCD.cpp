@@ -7,6 +7,7 @@ void ConvertPCDToDDS(const char* filePath)
 {
 	std::ifstream ifs(filePath, std::ios::binary);
 
+	//If there was a failure to open the file we must exit
 	if (!ifs.good())
 	{
 		ifs.close();
