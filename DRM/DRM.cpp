@@ -72,10 +72,10 @@ void cDRM::ExtractSections(char* szFilePath)
 	}
 
 #if TR8
-	this->uiNameSize = ReadUInt(ifs);
-	this->uiPaddingSize = ReadUInt(ifs);
-	this->uiUnk00 = ReadUInt(ifs);
-	this->uiUnk01 = ReadUInt(ifs);
+	this->m_nameSize = ReadUInt(ifs);
+	this->m_paddingSize = ReadUInt(ifs);
+	this->m_unk00 = ReadUInt(ifs);
+	this->m_unk01 = ReadUInt(ifs);
 #endif
 
 	this->m_numSections = ReadUInt(ifs);

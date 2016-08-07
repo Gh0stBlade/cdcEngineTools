@@ -27,7 +27,6 @@ int main(int argc, char* argv[])
 			ConvertDDSToPCD(argv[1]);
 			break;
 		}
-		system("Pause");
 	}
 	else
 	{
