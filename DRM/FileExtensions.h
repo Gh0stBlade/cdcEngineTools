@@ -20,7 +20,7 @@
 #ifndef FILEEXTENSIONS_H
 #define FILEEXTESNIONS_H
 
-#if TR7
+#if (TR7 || TRAE)
 
 		char* szExtensions[]
 		{
@@ -30,30 +30,12 @@
 				".pbrwc",
 				".pbr",
 				".pcd",
-				".fsb",
+				".wave",
 				".dtp",
 				".script",
 				".shad",
 				".nst"
 		};
-
-#elif TRAE
-
-	char* szExtensions[]
-	{
-		".gnc",
-			".ept",
-			".ani",
-			".pbrwc",
-			".pbr",
-			".pcd",
-			".fsb",
-			".dtp",
-			".script",
-			".shad",
-			".nst"
-	};
-
 #elif TR8
 	#if PC
 		char* szExtensions[]
