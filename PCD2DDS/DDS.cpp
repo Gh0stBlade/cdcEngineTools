@@ -1,4 +1,5 @@
 #include "DDS.h"
+#include "File.h"
 
 #include <iostream>
 #include <fstream>
@@ -10,6 +11,7 @@ void ConvertDDSToPCD(const char* filePath)
 	//If there was a failure to open the file we must exit
 	if (!ifs.good())
 	{
+		std::cout << "Error: failed to open the file!" << std::endl;
 		ifs.close();
 		return;
 	}
@@ -22,8 +24,17 @@ void ConvertDDSToPCD(const char* filePath)
 	//Load texture data header
 	char* fileBuffer = new char[sizeof(DDSHeader)];
 	ifs.read(fileBuffer, sizeof(DDSHeader));
+
 	DDSHeader* ddsHeader = nullptr;
 	ddsHeader = (DDSHeader*)fileBuffer;
+	if (ddsHeader->m_magic != DDS_MAGIC)
+	{
+		std::cout << "Error: DDS magic mis-match!" << std::endl;
+		ifs.close();
+		delete[] fileBuffer;
+		return;
+	}
+
 	char* textureData = new char[fileSize-0x80];
 	ifs.seekg(0x80, SEEK_SET);
 	ifs.read(textureData, fileSize - 0x80);
@@ -34,22 +45,6 @@ void ConvertDDSToPCD(const char* filePath)
 	sprintf_s(nameBuff, "%s%s", filePath, ".pcd");
 
 	std::ofstream ofs(nameBuff, std::ios::binary);
-
-	unsigned int pcdMagic = 0x39444350;
-	unsigned int pcdFormat = ddsHeader->m_format;
-	unsigned int pcdTextureDataSize = fileSize - 0x80;
-	unsigned int pcdPaletteDataSize = 0;
-	unsigned short pcdWidth = ddsHeader->m_width;///@TODO assert max unsigned short
-	unsigned short pcdHeight = ddsHeader->m_height;///@TODO assert max unsigned short
-	unsigned char pcdDepth = ddsHeader->m_depth;///@TODO assert max unsigned char
-	unsigned char pcdMipCount = ddsHeader->m_mipCount;///@TODO assert max unsigned char
-	unsigned short pcdFlags = 0x3; //??FILTER_ANISOTROPIC_1X = 0x3,
-
-	//Write section header
-	unsigned int sectionMagic = 0x54434553;
-	unsigned int sectionFileSize = pcdTextureDataSize + 0x18;
-	unsigned int Type = 0x5;
-	unsigned int headerSize = 0;
 
 	//
 	std::string path(filePath);
@@ -71,27 +66,24 @@ void ConvertDDSToPCD(const char* filePath)
 	unsigned int hash;
 	sscanf(filename.c_str(), "%x", &hash);
 
-	unsigned int lang = 0xFFFFFFFF;
-	ofs.write((char*)&sectionMagic, sizeof(unsigned int));
-	ofs.write((char*)&sectionFileSize, sizeof(unsigned int));
-	ofs.write((char*)&Type, sizeof(unsigned int));
-	ofs.write((char*)&headerSize, sizeof(unsigned int));
-	ofs.write((char*)&hash, sizeof(unsigned int));
-	ofs.write((char*)&lang, sizeof(unsigned int));
+	WriteUInt(ofs, SECTION_MAGIC);
+	WriteUInt(ofs, ((fileSize-0x80) + 0x18));
+	WriteUInt(ofs, (TEXTURE_SECTION_TYPE));
+	WriteUInt(ofs, 0);
+	WriteUInt(ofs, hash);
+	WriteUInt(ofs, 0xFFFFFFFF);
 
-	ofs.write((char*)&pcdMagic, sizeof(unsigned int));
-	ofs.write((char*)&pcdFormat, sizeof(unsigned int));
-	ofs.write((char*)&pcdTextureDataSize, sizeof(unsigned int));
-	ofs.write((char*)&pcdPaletteDataSize, sizeof(unsigned int));
+	WriteUInt(ofs, PCD_MAGIC);
+	WriteUInt(ofs, ddsHeader->m_format);
+	WriteUInt(ofs, (fileSize - 0x80));
+	WriteUInt(ofs, 0);
+	WriteUShort(ofs, ddsHeader->m_width);
+	WriteUShort(ofs, ddsHeader->m_height);
+	WriteUByte(ofs, ddsHeader->m_depth);
+	WriteUByte(ofs, ddsHeader->m_mipCount);
+	WriteUShort(ofs, 3);
 
-	ofs.write((char*)&pcdWidth, sizeof(unsigned short));
-	ofs.write((char*)&pcdHeight, sizeof(unsigned short));
-
-	ofs.write((char*)&pcdDepth, sizeof(unsigned char));
-	ofs.write((char*)&pcdMipCount, sizeof(unsigned char));
-	ofs.write((char*)&pcdFlags, sizeof(unsigned short));
-
-	ofs.write(textureData, fileSize - 0x80);
+	ofs.write(textureData, (fileSize - 0x80));
 
 	ofs.flush();
 	ofs.close();
