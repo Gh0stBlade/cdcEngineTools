@@ -59,7 +59,7 @@ short ReadShort(std::ifstream& ifs)
 	short val;
 	ifs.read((char*)&val, sizeof(short));
 #if ENDIAN_BIG
-	ReverseShort(val);
+	val = ReverseShort(val);
 #endif
 	return val;
 }
@@ -69,7 +69,7 @@ unsigned short ReadUShort(std::ifstream& ifs)
 	unsigned short val;
 	ifs.read((char*)&val, sizeof(unsigned short));
 #if ENDIAN_BIG
-	ReverseUShort(val);
+	val = ReverseUShort(val);
 #endif
 	return val;
 }
@@ -79,7 +79,7 @@ int ReadInt(std::ifstream& ifs)
 	int val;
 	ifs.read((char*)&val, sizeof(int));
 #if ENDIAN_BIG
-	ReverseInt(val);
+	val = ReverseInt(val);
 #endif
 	return val;
 }
@@ -89,7 +89,7 @@ unsigned int ReadUInt(std::ifstream& ifs)
 	unsigned int val;
 	ifs.read((char*)&val, sizeof(unsigned int));
 #if ENDIAN_BIG
-	ReverseUInt(val);
+	val = ReverseUInt(val);
 #endif
 	return val;
 }
@@ -110,7 +110,7 @@ void WriteShort(std::ofstream& ofs, short input)
 {
 	short val = input;
 #if ENDIAN_BIG
-	ReverseShort(val);
+	val = ReverseShort(val);
 #endif
 	ofs.write((char*)&val, sizeof(short));
 }
@@ -119,7 +119,7 @@ void WriteUShort(std::ofstream& ofs, unsigned short input)
 {
 	unsigned short val = input;
 #if ENDIAN_BIG
-	ReverseUShort(val);
+	val = ReverseUShort(val);
 #endif
 	ofs.write((char*)&val, sizeof(unsigned short));
 }
@@ -128,7 +128,7 @@ void WriteInt(std::ofstream& ofs, int input)
 {
 	int val = input;
 #if ENDIAN_BIG
-	ReverseInt(val);
+	val = ReverseInt(val);
 #endif
 	ofs.write((char*)&val, sizeof(int));
 }
@@ -137,7 +137,7 @@ void WriteUInt(std::ofstream& ofs, unsigned int input)
 {
 	unsigned int val = input;
 #if ENDIAN_BIG
-	ReverseUInt(val);
+	val = ReverseUInt(val);
 #endif
 	ofs.write((char*)&val, sizeof(unsigned int));
 }

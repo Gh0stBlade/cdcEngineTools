@@ -43,7 +43,7 @@ short ReadShort(std::ifstream& ifs)
 	short val;
 	ifs.read((char*)&val, sizeof(short));
 #if ENDIAN_BIG
-	ReverseShort(val);
+	val = ReverseShort(val);
 #endif
 	return val;
 }
@@ -53,7 +53,7 @@ unsigned short ReadUShort(std::ifstream& ifs)
 	unsigned short val;
 	ifs.read((char*)&val, sizeof(unsigned short));
 #if ENDIAN_BIG
-	ReverseUShort(val);
+	val = ReverseUShort(val);
 #endif
 	return val;
 }
@@ -63,7 +63,7 @@ int ReadInt(std::ifstream& ifs)
 	int val;
 	ifs.read((char*)&val, sizeof(int));
 #if ENDIAN_BIG
-	ReverseInt(val);
+	val = ReverseInt(val);
 #endif
 	return val;
 }
