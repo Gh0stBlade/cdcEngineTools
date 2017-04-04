@@ -7,7 +7,7 @@
 //Constants
 const unsigned int DRM_MAX_SECTIONS = 16777215;
 
-#define REPACK_MODE (1)
+#define REPACK_MODE (0)
 
 #if (TR7 || TRAE)
 	#define DRM_VERSION (14)
