@@ -18,6 +18,9 @@ int main(int argc, char* argv[])
 	{
 		unsigned int fileMagic = getFileMagic(argv[1]);
 
+#if PS3
+		fileMagic = ReverseUInt(fileMagic);
+#endif
 		switch (fileMagic)
 		{
 		case SECTION_MAGIC:
@@ -25,6 +28,9 @@ int main(int argc, char* argv[])
 			break;
 		case DDS_MAGIC:
 			ConvertDDSToPCD(argv[1]);
+			break;
+		default:
+			std::cout << "Failed to detect file type!" << std::endl;
 			break;
 		}
 	}
