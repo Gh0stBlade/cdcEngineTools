@@ -6,7 +6,7 @@
 #define DDS_MAGIC     (0x20534444)
 #define TEXTURE_SECTION_TYPE (5)
 
-#define PS3 1
+#define PS3 0
 
 #define PS3T_MAGIC (0x50533354)
 
@@ -20,9 +20,10 @@ namespace cdc
 		{
 			enum kFormat
 			{
+				BPP_32 = 0x15,
 				DXT1 = 0x31545844,
 				DXT3 = 0x33545844,
-				DTX5 = 0x35545844
+				DXT5 = 0x35545844
 			};
 
 			enum kFlags//Taken from TR7.pdb
@@ -54,6 +55,9 @@ namespace cdc
 				unsigned short m_flags;
 			};
 #pragma pack(pop)
+
+			void WriteDDS(const cdc::PC::Texture::Header& header, char* textureData, char* resultFileName);
+			void WriteTarga(const cdc::PC::Texture::Header& header, char* textureData, char* resultFileName);
 		}
 	}
 

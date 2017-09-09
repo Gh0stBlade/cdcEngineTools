@@ -34,5 +34,6 @@ struct DDSHeader
 #pragma pack(pop)
 
 void ConvertDDSToPCD(const char* filePath);
-
+void WritePCDDS(const char* resultFileName, std::ifstream& ifs);
+void WritePCTarga(const char* resultFileName, std::ifstream& ifs);
 #endif

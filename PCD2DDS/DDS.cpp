@@ -16,38 +16,56 @@ void ConvertDDSToPCD(const char* filePath)
 		return;
 	}
 
+	unsigned int magic;
+	ifs.read(reinterpret_cast<char*>(&magic), sizeof(unsigned int));
+	ifs.seekg(0, SEEK_SET);
+
+	switch (magic)
+	{
+	case 0x00020000://Targa
+		WritePCTarga(filePath, ifs);
+		break;
+	case DDS_MAGIC:
+		WritePCDDS(filePath, ifs);
+		break;
+	default:
+		std::cout << "Error: Unsupported texture format!" << std::endl;
+		break;
+	}
+
+	ifs.close();
+}
+
+void WritePCDDS(char* resultFileName, std::ifstream& ifs)
+{
 	int fileSize = 0;
 	ifs.seekg(0, SEEK_END);
 	fileSize = ifs.tellg();
 	ifs.seekg(0, SEEK_SET);
 
-	//Load texture data header
-	char* fileBuffer = new char[sizeof(DDSHeader)];
-	ifs.read(fileBuffer, sizeof(DDSHeader));
+	DDSHeader ddsHeader;
+	ifs.read(reinterpret_cast<char*>(&ddsHeader), sizeof(DDSHeader));
 
-	DDSHeader* ddsHeader = nullptr;
-	ddsHeader = (DDSHeader*)fileBuffer;
-	if (ddsHeader->m_magic != DDS_MAGIC)
+	if (ddsHeader.m_magic != DDS_MAGIC)
 	{
 		std::cout << "Error: DDS magic mis-match!" << std::endl;
 		ifs.close();
-		delete[] fileBuffer;
 		return;
 	}
 
-	char* textureData = new char[fileSize-0x80];
+	char* textureData = new char[fileSize - 0x80];
 	ifs.seekg(0x80, SEEK_SET);
 	ifs.read(textureData, fileSize - 0x80);
 	ifs.close();
 
 	char nameBuff[128];
 	memset(nameBuff, 0, 128);
-	sprintf_s(nameBuff, "%s%s", filePath, ".pcd");
+	sprintf_s(nameBuff, "%s%s", resultFileName, ".pcd");
 
 	std::ofstream ofs(nameBuff, std::ios::binary);
 
 	//
-	std::string path(filePath);
+	std::string path(resultFileName);
 	std::string filename;
 
 	size_t pos = path.find_last_of("\\");
@@ -67,26 +85,101 @@ void ConvertDDSToPCD(const char* filePath)
 	sscanf(filename.c_str(), "%x", &hash);
 
 	WriteUInt(ofs, SECTION_MAGIC);
-	WriteUInt(ofs, ((fileSize-0x80) + 0x18));
+	WriteUInt(ofs, ((fileSize - 0x80) + 0x18));
 	WriteUInt(ofs, (TEXTURE_SECTION_TYPE));
 	WriteUInt(ofs, 0);
 	WriteUInt(ofs, hash);
 	WriteUInt(ofs, 0xFFFFFFFF);
 
 	WriteUInt(ofs, PCD_MAGIC);
-	WriteUInt(ofs, ddsHeader->m_format);
+	WriteUInt(ofs, ddsHeader.m_format);
 	WriteUInt(ofs, (fileSize - 0x80));
 	WriteUInt(ofs, 0);
-	WriteUShort(ofs, ddsHeader->m_width);
-	WriteUShort(ofs, ddsHeader->m_height);
-	WriteUByte(ofs, ddsHeader->m_depth);
-	WriteUByte(ofs, ddsHeader->m_mipCount);
+	WriteUShort(ofs, ddsHeader.m_width);
+	WriteUShort(ofs, ddsHeader.m_height);
+	WriteUByte(ofs, ddsHeader.m_depth);
+	WriteUByte(ofs, ddsHeader.m_mipCount);
 	WriteUShort(ofs, 3);
 
 	ofs.write(textureData, (fileSize - 0x80));
 
-	ofs.flush();
-	ofs.close();
-	delete[] fileBuffer;
-	delete[] textureData;
+	delete [] textureData;
+}
+
+void WritePCTarga(char* resultFileName, std::ifstream& ifs)
+{
+	int fileSize = 0;
+	ifs.seekg(0, SEEK_END);
+	fileSize = ifs.tellg();
+	ifs.seekg(0, SEEK_SET);
+
+	unsigned int magic;
+	ifs.read(reinterpret_cast<char*>(&magic), sizeof(unsigned int));
+
+	if (magic != 0x00020000)
+	{
+		std::cout << "Error: Targa magic mis-match!" << std::endl;
+		ifs.close();
+		return;
+	}
+
+	ifs.seekg(0xC, SEEK_SET);
+
+	unsigned short width;
+	unsigned short height;
+
+	ifs.read(reinterpret_cast<char*>(&width), sizeof(unsigned short));
+	ifs.read(reinterpret_cast<char*>(&height), sizeof(unsigned short));
+
+	char* textureData = new char[width * height * 4];
+	ifs.seekg(0x12, SEEK_SET);
+	ifs.read(textureData, width * height * 4);
+	ifs.close();
+
+	char nameBuff[128];
+	memset(nameBuff, 0, 128);
+	sprintf_s(nameBuff, "%s%s", resultFileName, ".pcd");
+
+	std::ofstream ofs(nameBuff, std::ios::binary);
+
+	//
+	std::string path(resultFileName);
+	std::string filename;
+
+	size_t pos = path.find_last_of("\\");
+	if (pos != std::string::npos)
+	{
+		filename.assign(path.begin() + pos + 1, path.end());
+		pos = path.find_last_of("_");
+		filename.assign(path.begin() + pos + 1, path.end());
+		filename.erase(filename.find_first_of("."), std::string::npos);
+	}
+	else
+	{
+		filename = path;
+	}
+
+	unsigned int hash;
+	sscanf(filename.c_str(), "%x", &hash);
+
+	WriteUInt(ofs, SECTION_MAGIC);
+	WriteUInt(ofs, ((fileSize - 0x80) + 0x18));
+	WriteUInt(ofs, (TEXTURE_SECTION_TYPE));
+	WriteUInt(ofs, 0);
+	WriteUInt(ofs, hash);
+	WriteUInt(ofs, 0xFFFFFFFF);
+
+	WriteUInt(ofs, PCD_MAGIC);
+	WriteUInt(ofs, 0x15);
+	WriteUInt(ofs, (fileSize - 0x80));
+	WriteUInt(ofs, 0);
+	WriteUShort(ofs, width);
+	WriteUShort(ofs, height);
+	WriteUByte(ofs, 32);
+	WriteUByte(ofs, 0);
+	WriteUShort(ofs, 0);
+
+	ofs.write(textureData, width * height * 4);
+
+	delete [] textureData;
 }

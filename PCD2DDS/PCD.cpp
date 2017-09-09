@@ -6,7 +6,7 @@
 
 void ConvertPCDToDDS(const char* filePath)
 {
-#ifndef PS3
+#if !PS3
 	std::ifstream ifs(filePath, std::ios::binary);
 
 	//If there was a failure to open the file we must exit
@@ -46,65 +46,41 @@ void ConvertPCDToDDS(const char* filePath)
 	ifs.seekg(24, SEEK_SET);
 
 	//Load texture data header
-	char* fileBuffer = new char[sizeof(cdc::PC::Texture::Header)];
-	ifs.read(fileBuffer, sizeof(cdc::PC::Texture::Header));
+	cdc::PC::Texture::Header pcdHeader;
+	ifs.read(reinterpret_cast<char*>(&pcdHeader), sizeof(cdc::PC::Texture::Header));
 
-	cdc::PC::Texture::Header* pcdHeader = reinterpret_cast<cdc::PC::Texture::Header*>(fileBuffer);
-
-	if (pcdHeader->m_magic != PCD_MAGIC)
+	if (pcdHeader.m_magic != PCD_MAGIC)
 	{
 		std::cout << "Error PCD magic mis-match!" << std::endl;
 		ifs.close();
 		return;
 	}
 
-	char* textureData = new char[pcdHeader->m_textureDataSize];
-	ifs.read(textureData, pcdHeader->m_textureDataSize);
+	char* textureData = new char[pcdHeader.m_textureDataSize];
+	ifs.read(textureData, pcdHeader.m_textureDataSize);
 	ifs.close();
 
 	char nameBuff[128];
 	memset(nameBuff, 0, 128);
-	sprintf_s(nameBuff, "%s%s", filePath, ".dds");
+	
+	switch (pcdHeader.m_format)
+	{
+	case cdc::PC::Texture::kFormat::BPP_32:
+		sprintf_s(nameBuff, "%s%s", filePath, ".tga");
+		WriteTarga(pcdHeader, textureData, &nameBuff[0]);
+		break;
+	case cdc::PC::Texture::kFormat::DXT1:
+	case cdc::PC::Texture::kFormat::DXT3:
+	case cdc::PC::Texture::kFormat::DXT5:
+		sprintf_s(nameBuff, "%s%s", filePath, ".dds");
+		WriteDDS(pcdHeader, textureData, &nameBuff[0]);
+		break;
+	default:
+		std::cout << "Error: Unsupported texture format!" << std::endl;
+		break;
+	}
 
-	std::ofstream ofs(nameBuff, std::ios::binary);
-
-	unsigned int ddsSize = 0x7C;
-	unsigned int ddsFlags = 0x000A1007;
-	unsigned int ddsPitchOrLinearSize = 0x00010000;
-	unsigned int ddsDummy = 0;
-	unsigned int ddsHeight = pcdHeader->m_height;
-	unsigned int ddsWidth = pcdHeader->m_width;
-	unsigned int ddsDepth = pcdHeader->m_depth;
-	unsigned int ddsMipCount = pcdHeader->m_numMipMaps;
-	unsigned int ddsFormat = pcdHeader->m_format;
-	unsigned int ddsUnk00 = 0x00401008;
-
-	WriteUInt(ofs, DDS_MAGIC);
-	WriteUInt(ofs, ddsSize);
-	WriteUInt(ofs, ddsFlags);
-	WriteUInt(ofs, ddsHeight);
-
-	WriteUInt(ofs, ddsWidth);
-	WriteUInt(ofs, ddsPitchOrLinearSize);
-	WriteUInt(ofs, ddsDummy);
-	WriteUInt(ofs, ddsDepth);
-
-	WriteUInt(ofs, ddsMipCount);
-
-	//Reserved
-	ofs.seekp(12 * sizeof(unsigned int), SEEK_CUR);
-
-	WriteUInt(ofs, ddsFormat);
-	ofs.seekp(0x14, SEEK_CUR);
-	WriteUInt(ofs, ddsUnk00);
-	ofs.seekp(0x10, SEEK_CUR);
-
-	ofs.write(textureData, pcdHeader->m_textureDataSize);
-
-	ofs.flush();
-	ofs.close();
-	delete[] fileBuffer;
-	delete[] textureData;
+	delete [] textureData;
 #else
 	std::ifstream ifs(filePath, std::ios::binary);
 
@@ -146,27 +122,25 @@ void ConvertPCDToDDS(const char* filePath)
 	ifs.seekg(24, SEEK_SET);
 
 	//Load texture data header
-	char* fileBuffer = new char[sizeof(cdc::ps3::Texture::Header)];
-	ifs.read(fileBuffer, sizeof(cdc::ps3::Texture::Header));
-
-	cdc::ps3::Texture::Header* ps3tHeader = reinterpret_cast<cdc::ps3::Texture::Header*>(fileBuffer);
+	cdc::ps3::Texture::Header ps3tHeader;
+	ifs.read(reinterpret_cast<cdc::ps3::Texture::Header*>(&ps3tHeader), sizeof(cdc::ps3::Texture::Header));
 
 	//Endian swap
-	*&ps3tHeader->m_magic = ReverseUInt(*&ps3tHeader->m_magic);
-	*&ps3tHeader->m_textureDataSize = ReverseUInt(*&ps3tHeader->m_textureDataSize);
-	*&ps3tHeader->m_width = ReverseUShort(*&ps3tHeader->m_width);
-	*&ps3tHeader->m_height = ReverseUShort(*&ps3tHeader->m_height);
+	ps3tHeader.m_magic = ReverseUInt(ps3tHeader.m_magic);
+	ps3tHeader.m_textureDataSize = ReverseUInt(ps3tHeader.m_textureDataSize);
+	ps3tHeader.m_width = ReverseUShort(ps3tHeader.m_width);
+	ps3tHeader.m_height = ReverseUShort(ps3tHeader.m_height);
 
 	//Swap
-	if (ps3tHeader->m_magic != PS3T_MAGIC)
+	if (ps3tHeader.m_magic != PS3T_MAGIC)
 	{
 		std::cout << "Error PS3T magic mis-match!" << std::endl;
 		ifs.close();
 		return;
 	}
 
-	char* textureData = new char[ps3tHeader->m_textureDataSize];
-	ifs.read(textureData, ps3tHeader->m_textureDataSize);
+	char* textureData = new char[ps3tHeader.m_textureDataSize];
+	ifs.read(textureData, ps3tHeader.m_textureDataSize);
 	ifs.close();
 
 	char nameBuff[128];
@@ -179,11 +153,11 @@ void ConvertPCDToDDS(const char* filePath)
 	unsigned int ddsFlags = 0x000A1007;
 	unsigned int ddsPitchOrLinearSize = 0x00010000;
 	unsigned int ddsDummy = 0;
-	unsigned int ddsHeight = ps3tHeader->m_height;
-	unsigned int ddsWidth = ps3tHeader->m_width;
-	unsigned int ddsDepth = 0;//;ps3tHeader->m_depth;
-	unsigned int ddsMipCount = 0;// ps3tHeader->m_numMipMaps;
-	unsigned int ddsFormat = cdc::ps3::Texture::getFormat(ps3tHeader->m_format);
+	unsigned int ddsHeight = ps3tHeader.m_height;
+	unsigned int ddsWidth = ps3tHeader._width;
+	unsigned int ddsDepth = 0;//;ps3tHeader.m_depth;
+	unsigned int ddsMipCount = 0;// ps3tHeader.m_numMipMaps;
+	unsigned int ddsFormat = cdc::ps3::Texture::getFormat(ps3tHeader.m_format);
 	unsigned int ddsUnk00 = 0x00401008;
 
 	WriteUInt(ofs, DDS_MAGIC);
@@ -206,11 +180,10 @@ void ConvertPCDToDDS(const char* filePath)
 	WriteUInt(ofs, ddsUnk00);
 	ofs.seekp(0x10, SEEK_CUR);
 
-	ofs.write(textureData, ps3tHeader->m_textureDataSize);
+	ofs.write(textureData, ps3tHeader.m_textureDataSize);
 
 	ofs.flush();
 	ofs.close();
-	delete[] fileBuffer;
 	delete[] textureData;
 #endif
 }
@@ -230,4 +203,65 @@ unsigned int cdc::ps3::Texture::getFormat(unsigned int format)
 	}
 
 	return -1;
+}
+
+void cdc::PC::Texture::WriteDDS(const cdc::PC::Texture::Header& header, char* textureData, char* resultFileName)
+{
+	if (textureData == nullptr)
+	{
+		std::cout << "Error: invalid texture data pointer passed to WriteDDS!" << std::endl;
+		return;
+	}
+
+	std::ofstream ofs(resultFileName, std::ios::binary);
+
+	WriteUInt(ofs, DDS_MAGIC);
+	WriteUInt(ofs, 124);
+	WriteUInt(ofs, 0x000A1007);
+	WriteUInt(ofs, header.m_height);
+
+	WriteUInt(ofs, header.m_width);
+	WriteUInt(ofs, 0x00010000);
+	WriteUInt(ofs, 0);
+	WriteUInt(ofs, 0);
+
+	WriteUInt(ofs, header.m_numMipMaps);
+
+	//Reserved
+	ofs.seekp(12 * sizeof(unsigned int), SEEK_CUR);
+
+	WriteUInt(ofs, header.m_format);
+	ofs.seekp(0x14, SEEK_CUR);
+	WriteUInt(ofs, 0x00401008);
+	ofs.seekp(0x10, SEEK_CUR);
+
+	ofs.write(textureData, header.m_textureDataSize);
+
+	ofs.flush();
+	ofs.close();
+
+}
+
+void cdc::PC::Texture::WriteTarga(const cdc::PC::Texture::Header& header, char* textureData, char* resultFileName)
+{
+	if (textureData == nullptr)
+	{
+		std::cout << "Error: invalid texture data pointer passed to WriteTarga!" << std::endl;
+		return;
+	}
+
+	std::ofstream ofs(resultFileName, std::ios::binary);
+
+	WriteUInt(ofs, 0x00020000);
+	WriteUInt(ofs, 0);
+	WriteUInt(ofs, 0);
+
+	WriteUShort(ofs, header.m_width);
+	WriteUShort(ofs, header.m_height);
+	WriteUShort(ofs, 0x820);
+
+	ofs.write(textureData, header.m_textureDataSize);
+
+	ofs.flush();
+	ofs.close();
 }
