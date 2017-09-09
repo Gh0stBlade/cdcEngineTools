@@ -1,6 +1,8 @@
 #ifndef DDS_H
 #define DDS_H
 
+#include <iosfwd>
+
 #define SECTION_MAGIC (0x54434553)
 #define PCD_MAGIC     (0x39444350)
 #define DDS_MAGIC (0x20534444)
@@ -36,4 +38,5 @@ struct DDSHeader
 void ConvertDDSToPCD(const char* filePath);
 void WritePCDDS(const char* resultFileName, std::ifstream& ifs);
 void WritePCTarga(const char* resultFileName, std::ifstream& ifs);
+
 #endif

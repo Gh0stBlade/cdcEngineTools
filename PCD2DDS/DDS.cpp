@@ -36,7 +36,7 @@ void ConvertDDSToPCD(const char* filePath)
 	ifs.close();
 }
 
-void WritePCDDS(char* resultFileName, std::ifstream& ifs)
+void WritePCDDS(const char* resultFileName, std::ifstream& ifs)
 {
 	int fileSize = 0;
 	ifs.seekg(0, SEEK_END);
@@ -106,7 +106,7 @@ void WritePCDDS(char* resultFileName, std::ifstream& ifs)
 	delete [] textureData;
 }
 
-void WritePCTarga(char* resultFileName, std::ifstream& ifs)
+void WritePCTarga(const char* resultFileName, std::ifstream& ifs)
 {
 	int fileSize = 0;
 	ifs.seekg(0, SEEK_END);
