@@ -199,8 +199,6 @@ void cDRM::ExtractSections(char* szFilePath)
 			}
 
 			//Read then write the section data
-#if TR7 || TRAE
-			ifs.read(szSectionData, section->uiSize + ((section->uiHeaderSize >> 0x8) * 0x8));
 #if REPACK_MODE
 			//Write section header
 			WriteUInt(ofs, 0x54434553);
@@ -212,12 +210,12 @@ void cDRM::ExtractSections(char* szFilePath)
 			WriteUInt(ofs, section->uiHash);
 			WriteUInt(ofs, section->uiLang);
 #endif
+#if TR7 || TRAE
+			ifs.read(szSectionData, section->uiSize + ((section->uiHeaderSize >> 0x8) * 0x8));
 			ofs.write(szSectionData, section->uiSize + ((section->uiHeaderSize >> 0x8) * 0x8));
 #elif TR8
 			ifs.read(szSectionData, section->uiSize + (section->uiHeaderSize >> 0x8));
 			ofs.write(szSectionData, section->uiSize + (section->uiHeaderSize >> 0x8));
-#else
-#error "Unsupported Game!"
 #endif
 			//Flush and close ofstream
 			ofs.flush();
