@@ -123,7 +123,7 @@ void ConvertPCDToDDS(const char* filePath)
 
 	//Load texture data header
 	cdc::ps3::Texture::Header ps3tHeader;
-	ifs.read(reinterpret_cast<cdc::ps3::Texture::Header*>(&ps3tHeader), sizeof(cdc::ps3::Texture::Header));
+	ifs.read(reinterpret_cast<char*>(&ps3tHeader), sizeof(cdc::ps3::Texture::Header));
 
 	//Endian swap
 	ps3tHeader.m_magic = ReverseUInt(ps3tHeader.m_magic);
@@ -154,7 +154,7 @@ void ConvertPCDToDDS(const char* filePath)
 	unsigned int ddsPitchOrLinearSize = 0x00010000;
 	unsigned int ddsDummy = 0;
 	unsigned int ddsHeight = ps3tHeader.m_height;
-	unsigned int ddsWidth = ps3tHeader._width;
+	unsigned int ddsWidth = ps3tHeader.m_width;
 	unsigned int ddsDepth = 0;//;ps3tHeader.m_depth;
 	unsigned int ddsMipCount = 0;// ps3tHeader.m_numMipMaps;
 	unsigned int ddsFormat = cdc::ps3::Texture::getFormat(ps3tHeader.m_format);
