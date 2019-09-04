@@ -1,7 +1,7 @@
 #ifndef PLATFORM_H
 #define PLATFORM_H
 
-#if TR8
+#if TR8 || TRAS
 #if PC 
 	#define PLATFORM_FULL_NAME "PC"
 	#define PLATFORM_CONFIG_NAME "PC-W"

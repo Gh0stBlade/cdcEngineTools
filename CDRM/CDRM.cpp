@@ -145,8 +145,14 @@ void CDRM::Decompress(const char* filePath)
 
 	//Read our CDRM header into cCDRM
 	this->m_magic = ReadUInt(ifs);
+
+#if TRAS
+	this->m_numUnknownBlocks = ReadUInt(ifs);
+#else
 	ifs.seekg(0x4, SEEK_CUR);
-	if (this->m_magic != CDRM_MAGIC)
+#endif
+	
+	if (this->m_magic != CDRM_MAGIC && this->m_magic != CDRM_MAGIC_ENDIAN_BIG)
 	{
 		std::cout << "Fatal Error: Magic mis-match! expected: " << std::hex << CDRM_MAGIC << " got: " << std::hex << this->m_magic << std::endl;
 		ifs.close();

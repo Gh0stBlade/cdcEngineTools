@@ -22,6 +22,7 @@ int main(int argc, char* argv[])
 		{
 		case -1://Error occured
 			return 0;
+		case CDRM_MAGIC_ENDIAN_BIG:
 		case CDRM_MAGIC: //"CDRM"
 		{
 			//Decompress the cdrm from input path

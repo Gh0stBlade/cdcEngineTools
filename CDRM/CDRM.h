@@ -7,7 +7,8 @@
 #include <vector>
 
 //Constants
-const unsigned int CDRM_MAGIC = 0x4D524443;///@TODO Endian big!
+const unsigned int CDRM_MAGIC = 0x4D524443;
+const unsigned int CDRM_MAGIC_ENDIAN_BIG = 0x4344524D;
 const unsigned int CDRM_MAX_COMPRESSED_BLOCKS = 16777215;
 
 //Platform specific constants
@@ -40,6 +41,7 @@ public:
 
 private:
 	unsigned int m_magic;
+	unsigned int m_numUnknownBlocks;
 	unsigned int m_numCompressedBlocks;
 	std::vector<CDRMEntry> m_entries;
 };
