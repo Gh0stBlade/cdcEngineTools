@@ -111,6 +111,63 @@
 	#else
 		#error "Unsupported Platform!"
 	#endif
+#elif TRAS
+#if PC
+char* szExtensions[]
+{
+	".gnc",
+	".unk01",
+	".ani",
+	".unk03",
+	".unk04",
+	".tr8pcd9",
+	".fsb",
+	".dtp",
+	".script",
+	".shad",
+	".matd",
+	".obj",
+	".tr8mesh",
+	".unk13"
+};
+#elif XENON
+char* szExtensions[]
+{
+	".gnc",
+	".unk01",
+	".ani",
+	".unk03",
+	".unk04",
+	".tr8x360",
+	".fsb",
+	".dtp",
+	".script",
+	".shad",
+	".matd",
+	".obj",
+	".trasmesh",
+	".unk13"
+};
+#elif PS3
+char* szExtensions[]
+{
+	".gnc",
+	".unk01",
+	".ani",
+	".unk03",
+	".unk04",
+	".tr8ps3t",
+	".fsb",
+	".dtp",
+	".script",
+	".shad",
+	".matd",
+	".obj",
+	".tr8mesh",
+	".unk13"
+};
+#error "Unsupported Platform!"
+#endif
 #else
 	#error "Unsupported Game!"
 #endif

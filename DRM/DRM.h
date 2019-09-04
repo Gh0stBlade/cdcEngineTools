@@ -7,12 +7,14 @@
 //Constants
 const unsigned int DRM_MAX_SECTIONS = 16777215;
 
-#define REPACK_MODE (1)//Must be on for PCD->DDS tool
+#define REPACK_MODE (0)//Must be on for PCD->DDS tool
 
 #if (TR7 || TRAE)
 	#define DRM_VERSION (14)
 #elif TR8
 	#define DRM_VERSION (19)
+#elif TRAS
+	#define DRM_VERSION (21)
 #else
 	#error "Unsupported Game!"
 #endif
@@ -47,6 +49,12 @@ private:
 	unsigned int m_paddingSize;
 	unsigned int m_unk00;
 	unsigned int m_unk01;
+#elif TRAS
+	unsigned int m_nameSize;
+	unsigned int m_paddingSize;
+	unsigned int m_unk00;
+	unsigned int m_unk01;
+	unsigned int m_unk02;
 #endif
 
 	unsigned int m_numSections;

@@ -57,6 +57,12 @@ void cDRM::ExtractSections(char* szFilePath)
 	this->m_paddingSize = ReadUInt(ifs);
 	this->m_unk00 = ReadUInt(ifs);
 	this->m_unk01 = ReadUInt(ifs);
+#elif TRAS
+	this->m_nameSize = ReadUInt(ifs);
+	this->m_paddingSize = ReadUInt(ifs);
+	this->m_unk00 = ReadUInt(ifs);
+	this->m_unk01 = ReadUInt(ifs);
+	this->m_unk02 = ReadUInt(ifs);
 #endif
 
 	this->m_numSections = ReadUInt(ifs);
@@ -73,6 +79,10 @@ void cDRM::ExtractSections(char* szFilePath)
 		return;
 	}
 
+#if TRAS
+	ifs.seekg(0x4, SEEK_CUR);
+#endif
+
 	//Read all the section info into this
 	for (int i = 0; i != this->m_numSections; i++)
 	{
@@ -83,12 +93,12 @@ void cDRM::ExtractSections(char* szFilePath)
 		section->ucType = ReadUByte(ifs);
 		section->ucUnk00 = ReadUByte(ifs);
 		section->usUnk01 = ReadUShort(ifs);
-		section->uiHeaderSize = ReadUInt(ifs);
+		section->uiHeaderSize = ReadUInt(ifs);	
 		section->uiHash = ReadUInt(ifs);
 		section->uiLang = ReadUInt(ifs);
 	}
 
-#if TR8
+#if TR8 || TRAS
 	//Skip past names & padding info
 	ifs.seekg(this->m_nameSize + this->m_paddingSize, SEEK_CUR);
 #endif
@@ -145,6 +155,8 @@ void cDRM::ExtractSections(char* szFilePath)
 			ifs.seekg(((section->uiHeaderSize >> 0x8) * 0x8), SEEK_CUR);
 #elif TR8
 			ifs.seekg((section->uiHeaderSize >> 0x8), SEEK_CUR);
+#elif TRAS
+			ifs.seekg((section->uiHeaderSize >> 0x8), SEEK_CUR);
 #else
 #error "Unsupported Game!"
 #endif
@@ -181,6 +193,8 @@ void cDRM::ExtractSections(char* szFilePath)
 			char* szSectionData = new char[section->uiSize + ((section->uiHeaderSize >> 0x8) * 0x8)];
 #elif TR8
 			char* szSectionData = new char[section->uiSize + (section->uiHeaderSize >> 0x8)];
+#elif TRAS
+			char* szSectionData = new char[section->uiSize + (section->uiHeaderSize >> 0x8)];
 #endif
 
 			//Declare output file stream
@@ -214,6 +228,9 @@ void cDRM::ExtractSections(char* szFilePath)
 			ifs.read(szSectionData, section->uiSize + ((section->uiHeaderSize >> 0x8) * 0x8));
 			ofs.write(szSectionData, section->uiSize + ((section->uiHeaderSize >> 0x8) * 0x8));
 #elif TR8
+			ifs.read(szSectionData, section->uiSize + (section->uiHeaderSize >> 0x8));
+			ofs.write(szSectionData, section->uiSize + (section->uiHeaderSize >> 0x8));
+#elif TRAS
 			ifs.read(szSectionData, section->uiSize + (section->uiHeaderSize >> 0x8));
 			ofs.write(szSectionData, section->uiSize + (section->uiHeaderSize >> 0x8));
 #endif
